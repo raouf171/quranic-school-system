@@ -1,4 +1,4 @@
-#prequisties :
+# prequisties :
 
 ### For Backend (Laravel)
 - **PHP** 8.1 or higher ([Download](https://www.php.net/downloads))

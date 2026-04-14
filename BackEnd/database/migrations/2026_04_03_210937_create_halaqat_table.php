@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
 
             $table ->foreignId('teacher_id')
-                    ->unique()
-                   ->nullOnDelete()
+                    
+            ->nullOnDelete()
                    ->constrained('teachers') ;   
 
             $table ->string ('name' ,100) ; 

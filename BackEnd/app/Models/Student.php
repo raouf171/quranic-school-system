@@ -14,7 +14,7 @@ class Student extends Model
     ];
 
     protected $casts = [
-        'birth_date'=>'boolean',
+        'birth_date'=>'date',
     ];
 
     //relation

@@ -6,43 +6,41 @@ use Illuminate\Database\Eloquent\Model;
 
 class Halaqa extends Model
 {
-    //
+    protected $table = 'halaqat';
 
-    protected $table = 'halaqat' ; 
-    
     protected $fillable = [
-        'teacher_id' , 'name' , 'schedule' , 'maxx_students' , 'is_active' 
+        'teacher_id',
+        'name',
+        'schedule',
+        'max_students',      // ← FIXED: was 'maxx_students'
+        'is_active'
     ];
 
     protected $casts = [
-        'is_active' => 'boolean' , 
-        'max_student'=> 'integer', 
+        'is_active' => 'boolean',
+        'max_students' => 'integer',   // ← FIXED: was 'max_student'
     ];
 
-    //relationships 
-    public function teacher() {
+    // Relationships
+
+    public function teacher()
+    {
         return $this->belongsTo(Teacher::class, 'teacher_id');
-    } 
-
-    public function studensts() {
-        return $this->hasMany(Student::class , 'halaqa_id') ;
     }
 
-    public function seacnes(){
-        return $this->hasMany(Seance::class , 'halaqa_id') ; 
-
+    public function students()           // ← FIXED: was 'studensts'
+    {
+        return $this->hasMany(Student::class, 'halaqa_id');
     }
 
-        public function isFull(): bool {
-            if
-             ($this->studensts->count() >= $this->max_students) {
-                return true;
-            } else {
-                return false;
-            }
+    public function seances()            // ← FIXED: was 'seacnes'
+    {
+        return $this->hasMany(Seance::class, 'halaqa_id');
+    }
 
-        }
-        
-
-    
+    // Check if Halaqa is full
+    public function isFull(): bool
+    {
+        return $this->students()->count() >= $this->max_students;
+    }
 }

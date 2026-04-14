@@ -1,0 +1,82 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Account;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
+
+class AuthController extends Controller
+{
+    //log in function 
+    public function login(Request $request): JsonResponse
+    {
+        
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+//search for account in the account table
+        $account = Account::where('email', $request->email)->firstOrFail();
+
+        //Verifier si le compte existe 
+        if (!$account || !Hash::check($request->password, $account->password)) {
+            return response()->json([
+                'message' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+            ], 401); 
+        }
+
+        // Étape 4 — Vérifier si le compte est actif
+        if (!$account->is_active) {
+            return response()->json([
+                'message' => 'هذا الحساب غير نشط. تواصل مع المسؤول لكي تفعله ',
+            ], 403);
+        }
+
+        // Supprimer les anciens tokens , had la partie ra7 tkoun f log out , but in case where ...
+        $account->tokens()->delete();
+
+        $token = $account->createToken('auth_token')->plainTextToken;
+
+        $profile = $account->getProfile();
+
+        // L'app mobile stocke token + role pour navigation
+        return response()->json([
+            'token'   => $token,
+            'role'    => $account->role,
+            'profile' => $profile,
+        ], 200);
+    }
+
+ 
+
+
+
+    ///LOG OUT FUNCNTON
+    public function logout(Request $request): JsonResponse
+    {
+      
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'تم تسجيل الخروج بنجاح',
+        ], 200);
+    }
+
+    // GET /api/me 
+        public function me(Request $request): JsonResponse
+    {
+        
+        $account = $request->user();
+
+        $profile = $account->getProfile();
+
+        return response()->json([
+            'role'    => $account->role,
+            'email'   => $account->email,
+            'profile' => $profile,
+        ], 200);
+    }
+}

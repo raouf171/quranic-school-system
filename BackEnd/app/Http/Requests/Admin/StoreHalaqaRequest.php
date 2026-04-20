@@ -14,7 +14,6 @@ class StoreHalaqaRequest extends FormRequest
             'teacher_id'   => 'nullable|integer|exists:teachers,id',
             'name'         => 'required|string|max:100',
             'schedule'     => 'nullable|string|max:255',
-            'level'        => 'nullable|string|max:50',
             'max_students' => 'nullable|integer|min:1|max:100',
         ];
     }

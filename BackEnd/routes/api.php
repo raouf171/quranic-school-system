@@ -4,6 +4,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminHalaqaController;
 use App\Http\Controllers\Admin\AdminTeacherController;
+use App\Http\Controllers\Teacher\TeacherHalaqaController;
+use App\Http\Controllers\Teacher\TeacherSeanceController;
+use App\Http\Controllers\Teacher\TeacherAttendanceController;
+use App\Http\Controllers\Teacher\TeacherMemorizationController;
+use App\Http\Controllers\Teacher\TeacherRevisionController;
 use Illuminate\Support\Facades\Route;
 
 // ══════════════════════════════════════════
@@ -19,53 +24,71 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
 
-    // ── ADMIN ─────────────────────────────────────────
+    // ── ADMIN ─────────────────────────────
     Route::middleware('role:admin')
          ->prefix('admin')
-         ->name('admin.')
          ->group(function () {
-
-        // Students — CRUD complet
-        // Génère automatiquement:
-        // GET    /admin/students
-        // POST   /admin/students
-        // GET    /admin/students/{student}
-        // PUT    /admin/students/{student}
-        // DELETE /admin/students/{student}
         Route::apiResource('students', AdminStudentController::class);
-
-        // Halaqat — CRUD complet
-        Route::apiResource('halaqat', AdminHalaqaController::class);
-
-        // Route supplémentaire: étudiants d'une halaqa
-        Route::get('halaqat/{halaqa}/students',
-            [AdminHalaqaController::class, 'students']
-        );
-
-        // Teachers — lecture + modification seulement
-        Route::get('teachers',        [AdminTeacherController::class, 'index']);
+        Route::apiResource('halaqat',  AdminHalaqaController::class);
+        Route::get('halaqat/{halaqa}/students', [AdminHalaqaController::class, 'students']);
+        Route::get('teachers',           [AdminTeacherController::class, 'index']);
         Route::get('teachers/{teacher}', [AdminTeacherController::class, 'show']);
         Route::put('teachers/{teacher}', [AdminTeacherController::class, 'update']);
     });
 
-    // ── TEACHER ───────────────────────────────────────
+    // ── TEACHER ───────────────────────────
     Route::middleware('role:teacher')
          ->prefix('teacher')
          ->group(function () {
-        // Sera ajouté Jour 3
+
+        // Halaqat du teacher
+        Route::get('halaqat',
+            [TeacherHalaqaController::class, 'index']);
+        Route::get('halaqat/{halaqa}/students',
+            [TeacherHalaqaController::class, 'students']);
+
+        // Prochaine séance + salle
+        Route::get('next-seance',
+            [TeacherHalaqaController::class, 'nextSeance']);
+
+        // Séances
+        Route::get('halaqat/{halaqa}/seances',
+            [TeacherSeanceController::class, 'index']);
+        Route::post('halaqat/{halaqa}/seances',
+            [TeacherSeanceController::class, 'store']);
+        Route::get('seances/{seance}',
+            [TeacherSeanceController::class, 'show']);
+
+        // Présence
+        Route::get('seances/{seance}/attendance',
+            [TeacherAttendanceController::class, 'index']);
+        Route::post('seances/{seance}/attendance',
+            [TeacherAttendanceController::class, 'store']);
+        Route::put('attendance/{attendance}',
+            [TeacherAttendanceController::class, 'update']);
+
+        // Mémorisation (hifz)
+        Route::get('seances/{seance}/memorizations',
+            [TeacherMemorizationController::class, 'index']);
+        Route::post('seances/{seance}/memorizations',
+            [TeacherMemorizationController::class, 'store']);
+
+        // Révision (muraja'ah)
+        Route::get('seances/{seance}/revisions',
+            [TeacherRevisionController::class, 'index']);
+        Route::post('seances/{seance}/revisions',
+            [TeacherRevisionController::class, 'store']);
     });
 
-    // ── PARENT ────────────────────────────────────────
+    // ── PARENT ────────────────────────────
     Route::middleware('role:parent')
          ->prefix('parent')
          ->group(function () {
-        // Sera ajouté Jour 4
+        // Jour 4
     });
 
-    // ── TOUS LES RÔLES ────────────────────────────────
+    // ── TOUS LES RÔLES ────────────────────
     Route::get('/evaluations', function () {
-        return response()->json(
-            \App\Models\Evaluation::all()
-        );
+        return response()->json(\App\Models\Evaluation::all());
     });
 });

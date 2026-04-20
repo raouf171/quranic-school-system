@@ -56,7 +56,7 @@ class AdminStudentController extends Controller
     }
 
     // GET /api/admin/students/{student}
-    // Laravel injecte automatiquement le Student via Route Model Binding
+   
     public function show(Student $student): JsonResponse
     {
         // Recharger avec toutes les relations pour la vue détail

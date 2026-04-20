@@ -18,17 +18,17 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-//search for account in the account table
+//chercher
         $account = Account::where('email', $request->email)->firstOrFail();
 
-        //Verifier si le compte existe 
+//Verifier si le compte existe 
         if (!$account || !Hash::check($request->password, $account->password)) {
             return response()->json([
                 'message' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
             ], 401); 
         }
 
-        // Étape 4 — Vérifier si le compte est actif
+//  compte est actif
         if (!$account->is_active) {
             return response()->json([
                 'message' => 'هذا الحساب غير نشط. تواصل مع المسؤول لكي تفعله ',

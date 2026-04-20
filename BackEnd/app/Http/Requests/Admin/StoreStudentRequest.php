@@ -31,6 +31,7 @@ class StoreStudentRequest extends FormRequest
         ];
     }
 
+    // Messages d'erreur personnalisés en arabe/français
     public function messages(): array
     {
         return [

@@ -80,7 +80,7 @@ class TeacherSeanceController extends Controller
         );
 
         // Charger les relations pour la réponse
-        $seance->load(['halaqat', 'classroom', 'teacher']);
+        $seance->load(['halaqa', 'classroom', 'teacher']);
 
         return response()->json(
             new SeanceResource($seance),

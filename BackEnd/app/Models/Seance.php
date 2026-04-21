@@ -37,7 +37,7 @@ class Seance extends Model
     }
 
     // Rest of your relations
-    public function halaqat()
+    public function halaqa()
     {
         return $this->belongsTo(Halaqa::class, 'halaqa_id'); 
     }
@@ -62,10 +62,7 @@ class Seance extends Model
         return $this->hasMany(Revision::class, 'seance_id'); 
     }
 
-    public function evaluations()
-    {
-        return $this->hasMany(Evaluation::class, 'seance_id');
-    }
+  
 
     public function attendances()
     {

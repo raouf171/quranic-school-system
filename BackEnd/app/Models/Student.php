@@ -28,15 +28,12 @@ public function halaqa()
         return $this->belongsTo(Halaqa::class, 'halaqa_id');
     }
 
-public function attendance()
+public function attendances()
     {
         return $this->hasMany(Attendance::class, 'student_id');
     }
 
-    public function evaluations()
-    {
-        return $this->hasMany(Evaluation::class, 'student_id');
-    }
+   
 
     public function payments()
     {

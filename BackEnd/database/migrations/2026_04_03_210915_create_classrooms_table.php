@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table ->unsignedInteger('capacity')->default(30) ; 
 
-            $table ->boolean ('is_available')->defaul ('true');
+            $table ->boolean ('is_available')->default (true);
 
             $table->timestamps();
         });

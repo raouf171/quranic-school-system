@@ -33,7 +33,15 @@ public function attendances()
         return $this->hasMany(Attendance::class, 'student_id');
     }
 
-   
+    public function memorizations()
+    {
+        return $this->hasMany(Memorization::class, 'student_id');
+    }
+
+    public function revisions()
+    {
+        return $this->hasMany(Revision::class, 'student_id');
+    }
 
     public function payments()
     {

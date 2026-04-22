@@ -8,6 +8,9 @@ use App\Models\ParentProfile;
 use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Database\Seeder;
+use App\Models\Payment;
+use App\Models\Announcement;
+use App\Models\Admin;
 
 class TestDataSeeder extends Seeder
 {
@@ -227,5 +230,53 @@ class TestDataSeeder extends Seeder
         $this->command->info('   Parent  1: parent1@school.com  / Parent@1234');
         $this->command->info('   Parent  2: parent2@school.com  / Parent@1234');
         $this->command->info('   Parent  3: parent3@school.com  / Parent@1234');
+        $studentIds = Student::pluck('id');
+foreach ($studentIds as $sid) {
+    Payment::firstOrCreate(
+        ['student_id' => $sid, 'month' => '2025-03'],
+        [
+            'amount'   => 1500.00,
+            'due_date' => '2025-03-05',
+            'status'   => 'paid',
+            'paid_date'=> '2025-03-03',
+        ]
+    );
+    Payment::firstOrCreate(
+        ['student_id' => $sid, 'month' => '2025-04'],
+        [
+            'amount'   => 1500.00,
+            'due_date' => '2025-04-05',
+            'status'   => 'pending',
+            'paid_date'=> null,
+        ]
+    );
+}
+
+// ── ANNOUNCEMENTS ───────────────────────────
+$admin = Admin::first();
+if ($admin) {
+    Announcement::firstOrCreate(
+        ['title' => 'مرحباً بكم في المدرسة القرآنية'],
+        [
+            'created_by'   => $admin->id,
+            'content'      => 'نرحب بجميع الطلاب وأولياء الأمور في بداية الفصل الدراسي الجديد.',
+            'target_roles' => ['all'],
+            'expiry_date'  => null,
+        ]
+    );
+    Announcement::firstOrCreate(
+        ['title' => 'تذكير بموعد دفع الاشتراك'],
+        [
+            'created_by'   => $admin->id,
+            'content'      => 'نذكر أولياء الأمور بضرورة دفع اشتراك شهر أبريل قبل تاريخ 10/04/2025.',
+            'target_roles' => ['parent'],
+            'expiry_date'  => '2025-04-30',
+        ]
+    );
+}
+
+$this->command->info('✅ Payments + Announcements créés');
     }
+
+    
 }

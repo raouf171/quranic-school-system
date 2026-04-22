@@ -11,13 +11,14 @@ class Memorization extends Model
     protected $fillable = [
         'seance_id', 
         'student_id', 
+        'teacher_id',
         'evaluation_id', 
         'surah_start', 
         'verse_start', 
         'surah_end', 
         'verse_end',
         'evaluation_grade',
-        'points'  // ← ADD THIS
+        'points'  
     ];
 
     protected $casts = [

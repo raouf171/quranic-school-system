@@ -13,7 +13,7 @@ class AttendanceResource extends JsonResource
             'id'                => $this->id,
             'status'            => $this->status,
             'evaluation_grade'  => $this->evaluation_grade,
-            'points' => $this->evaluation_points,
+            'points' => $this->points,
 
             'student' => $this->whenLoaded('student', fn() => [
                 'id'        => $this->student->id,
@@ -22,7 +22,7 @@ class AttendanceResource extends JsonResource
 
             'seance' => $this->whenLoaded('seance', fn() => [
                 'id'   => $this->seance->id,
-                'date' => $this->seance->date?->format('Y-m-d'),
+                'date' => $this->seance->dateEntry?->date_value?->format('Y-m-d'),
             ]),
         ];
     }

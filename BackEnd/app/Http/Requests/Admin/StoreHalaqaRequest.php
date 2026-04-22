@@ -13,6 +13,7 @@ class StoreHalaqaRequest extends FormRequest
         return [
             'teacher_id'   => 'nullable|integer|exists:teachers,id',
             'name'         => 'required|string|max:100',
+            'gender'       => 'required|in:male,female',
             'schedule'     => 'nullable|string|max:255',
             'max_students' => 'nullable|integer|min:1|max:100',
         ];

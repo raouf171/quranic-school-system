@@ -14,7 +14,7 @@ class Attendance extends Model
         'status',
         'evaluation_grade',
         'points',
-        'recorded_by'
+        
     ];
 
     protected $casts = [

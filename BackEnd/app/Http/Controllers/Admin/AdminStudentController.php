@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreStudentRequest;
 use App\Http\Requests\Admin\UpdateStudentRequest;
+use App\Http\Requests\Admin\UploadStudentPhotoRequest;
 use App\Http\Resources\StudentResource;
 use App\Models\Student;
 use App\Repositories\Interfaces\StudentRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AdminStudentController extends Controller
 {
@@ -17,6 +19,65 @@ class AdminStudentController extends Controller
     public function __construct(
         private StudentRepositoryInterface $studentRepository
     ) {}
+
+    // GET /api/admin/students/form-enums
+    public function formEnums(): JsonResponse
+    {
+        return response()->json([
+            'gender' => [
+                ['value' => 'male', 'label' => 'Garçon / ذكر'],
+                ['value' => 'female', 'label' => 'Fille / أنثى'],
+            ],
+            'relationship_nature' => [
+                ['value' => 'mother', 'label' => 'Mère'],
+                ['value' => 'father', 'label' => 'Père'],
+                ['value' => 'uncle', 'label' => 'Oncle'],
+                ['value' => 'aunt', 'label' => 'Tante'],
+                ['value' => 'grandfather', 'label' => 'Grand-père'],
+                ['value' => 'grandmother', 'label' => 'Grand-mère'],
+                ['value' => 'legal_guardian', 'label' => 'Tuteur légal'],
+                ['value' => 'other', 'label' => 'Autre'],
+            ],
+            'school_level' => [
+                ['value' => 'kindergarten', 'label' => 'Maternelle'],
+                ['value' => 'primary', 'label' => 'Primaire'],
+                ['value' => 'middle_cem', 'label' => 'CEM / Collège'],
+                ['value' => 'high_school', 'label' => 'Lycée'],
+                ['value' => 'university', 'label' => 'Université'],
+                ['value' => 'other', 'label' => 'Autre'],
+            ],
+        ]);
+    }
+
+    // POST /api/admin/students/{student}/photo
+    public function uploadPhoto(UploadStudentPhotoRequest $request, Student $student): JsonResponse
+    {
+        $file = $request->file('photo');
+        $path = $file->store('students/photos', 'public');
+
+        if ($student->photo_path) {
+            Storage::disk('public')->delete($student->photo_path);
+        }
+
+        $this->studentRepository->update($student, ['photo_path' => $path]);
+
+        return response()->json(
+            new StudentResource($student->fresh(['halaqa', 'parent']))
+        );
+    }
+
+    // DELETE /api/admin/students/{student}/photo
+    public function deletePhoto(Student $student): JsonResponse
+    {
+        if ($student->photo_path) {
+            Storage::disk('public')->delete($student->photo_path);
+            $this->studentRepository->update($student, ['photo_path' => null]);
+        }
+
+        return response()->json(
+            new StudentResource($student->fresh(['halaqa', 'parent']))
+        );
+    }
 
     // GET /api/admin/students
     // GET /api/admin/students?search=ahmed
@@ -87,6 +148,10 @@ class AdminStudentController extends Controller
     // DELETE /api/admin/students/{student}
     public function destroy(Student $student): JsonResponse
     {
+        if ($student->photo_path) {
+            Storage::disk('public')->delete($student->photo_path);
+        }
+
         $this->studentRepository->delete($student);
 
         return response()->json([

@@ -20,16 +20,24 @@ class TeacherMemorizationController extends Controller
     }
 
     // GET /api/teacher/seances/{seance}/memorizations
-    public function index(Seance $seance): JsonResponse
-    {
-        $memorizations = $seance->memorizations()
-                                ->with(['student', 'evaluation'])
-                                ->get();
-
-        return response()->json(
-            MemorizationResource::collection($memorizations)
-        );
+    public function index(Request $request, Seance $seance): JsonResponse
+{
+    $teacher = $this->getTeacher($request);
+    
+    if ($seance->halaqa->teacher_id !== $teacher->id) {
+        return response()->json([
+            'message' => 'ليس بك صلاحية الاطلاع على هده الحلقة !'
+        ], 403);
     }
+    
+    $memorizations = $seance->memorizations()
+                            ->with(['student', 'evaluation'])
+                            ->get();
+
+    return response()->json(
+        MemorizationResource::collection($memorizations)
+    );
+}
 
     // POST /api/teacher/seances/{seance}/memorizations
     // Enregistrer le hifz d'un étudiant
@@ -39,7 +47,14 @@ class TeacherMemorizationController extends Controller
         Seance $seance
     ): JsonResponse {
         $teacher = $this->getTeacher($request);
-
+        
+        // ✅ Verify teacher owns this seance
+        if ($seance->halaqa->teacher_id !== $teacher->id) {
+            return response()->json([
+                'message' => 'ليس لديط الصلاحية لإضافة معلومات إلى هذه الجلسة'
+            ], 403);
+        }
+        
         $memorization = Memorization::create([
             'seance_id'     => $seance->id,
             'student_id'    => $request->student_id,
@@ -48,12 +63,10 @@ class TeacherMemorizationController extends Controller
             'verse_start'   => $request->verse_start,
             'surah_end'     => $request->surah_end,
             'verse_end'     => $request->verse_end,
-            // evaluation_grade et evaluation_points seront
-            // remplis automatiquement par MemorizationObserver
         ]);
-
+    
         $memorization->load(['student', 'evaluation']);
-
+    
         return response()->json(
             new MemorizationResource($memorization),
             201

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table ->foreignId('parent_id')
-                   ->nullOndelete()
+                   ->nullOnDelete()
                    ->constrained('parents')  ; 
 
              $table->foreignId('halaqa_id')

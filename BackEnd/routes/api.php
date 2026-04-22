@@ -11,6 +11,7 @@ use App\Http\Controllers\Teacher\TeacherMemorizationController;
 use App\Http\Controllers\Teacher\TeacherRevisionController;
 use App\Http\Controllers\Parent\ParentController;
 use App\Http\Controllers\Admin\AdminAccountController;
+use App\Http\Controllers\Admin\AdminParentController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')
          ->prefix('admin')
          ->group(function () {
+        Route::get('students/form-enums', [AdminStudentController::class, 'formEnums']);
+        Route::post('students/{student}/photo', [AdminStudentController::class, 'uploadPhoto']);
+        Route::delete('students/{student}/photo', [AdminStudentController::class, 'deletePhoto']);
+        Route::put('parents/{parent}', [AdminParentController::class, 'update']);
+
         Route::apiResource('students', AdminStudentController::class);
         Route::apiResource('halaqat',  AdminHalaqaController::class);
         Route::get('halaqat/{halaqa}/students', [AdminHalaqaController::class, 'students']);

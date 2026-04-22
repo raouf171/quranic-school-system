@@ -44,6 +44,7 @@ class UserFactory
             $parent = ParentProfile::create([
                 'account_id' => $account->id,
                 'name'       => $data['name'],
+                'phone'      => $data['phone'] ?? null,
                 'occupation' => $data['occupation'] ?? null,
                 'address'    => $data['address'] ?? null,
             ]);

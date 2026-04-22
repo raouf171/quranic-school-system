@@ -18,6 +18,7 @@ class StoreParentRequest extends FormRequest
             'name'       => 'required|string|max:100',
             'email'      => 'required|email|unique:accounts,email',
             'password'   => 'required|string|min:8',
+            'phone'      => 'nullable|string|max:30',
             'occupation' => 'nullable|string|max:255',
             'address'    => 'nullable|string',
         ];

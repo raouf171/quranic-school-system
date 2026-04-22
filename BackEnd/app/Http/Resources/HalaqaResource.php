@@ -12,6 +12,7 @@ class HalaqaResource extends JsonResource
         return [
             'id'           => $this->id,
             'name'         => $this->name,
+            'gender'       => $this->gender,
             'level'        => $this->level,
             'schedule'     => $this->schedule,
             'max_students' => $this->max_students,

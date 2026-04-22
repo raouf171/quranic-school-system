@@ -85,21 +85,32 @@ class TeacherAttendanceController extends Controller
 
     // PUT /api/teacher/attendance/{attendance}
     // Corriger une seule présence
-    public function update(
-        Request $request,
-        Attendance $attendance
-    ): JsonResponse {
+    public function update(Request $request, Attendance $attendance): JsonResponse
+    {
         $request->validate([
             'status' => 'required|in:present,absent,late,excused',
         ]);
-
-        // update() déclenche l'Observer → recalcul automatique
+    
+        $teacher = $this->getTeacher($request);
+        
+        $attendance = Attendance::where('id', $attendance->id)
+            ->whereHas('seance.halaqa', function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id);
+            })
+            ->first();
+        
+        if (!$attendance) {
+            return response()->json([
+                'message' => 'Présence non trouvée ou accès non autorisé'
+            ], 403);
+        }
+    
         $attendance->update([
             'status' => $request->status,
         ]);
-
+    
         return response()->json(
             new AttendanceResource($attendance->load('student'))
         );
-    }
+    }    
 }

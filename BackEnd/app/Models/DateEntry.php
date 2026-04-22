@@ -15,7 +15,6 @@ class DateEntry extends Model
     protected $fillable = [
         'date_value',
         'created_by',
-        'label',
     ];
 
     protected $casts = [

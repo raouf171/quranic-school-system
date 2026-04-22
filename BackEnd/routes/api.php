@@ -9,6 +9,10 @@ use App\Http\Controllers\Teacher\TeacherSeanceController;
 use App\Http\Controllers\Teacher\TeacherAttendanceController;
 use App\Http\Controllers\Teacher\TeacherMemorizationController;
 use App\Http\Controllers\Teacher\TeacherRevisionController;
+use App\Http\Controllers\Parent\ParentController;
+use App\Http\Controllers\Admin\AdminAccountController;
+use App\Http\Controllers\Admin\AdminParentController;
+
 use Illuminate\Support\Facades\Route;
 
 // ══════════════════════════════════════════
@@ -28,12 +32,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')
          ->prefix('admin')
          ->group(function () {
+        Route::get('students/form-enums', [AdminStudentController::class, 'formEnums']);
+        Route::post('students/{student}/photo', [AdminStudentController::class, 'uploadPhoto']);
+        Route::delete('students/{student}/photo', [AdminStudentController::class, 'deletePhoto']);
+        Route::put('parents/{parent}', [AdminParentController::class, 'update']);
+
         Route::apiResource('students', AdminStudentController::class);
         Route::apiResource('halaqat',  AdminHalaqaController::class);
         Route::get('halaqat/{halaqa}/students', [AdminHalaqaController::class, 'students']);
         Route::get('teachers',           [AdminTeacherController::class, 'index']);
         Route::get('teachers/{teacher}', [AdminTeacherController::class, 'show']);
         Route::put('teachers/{teacher}', [AdminTeacherController::class, 'update']);
+
+
+        Route::get('accounts',                           [AdminAccountController::class, 'index']);
+        Route::post('accounts/teacher',                  [AdminAccountController::class, 'storeTeacher']);
+        Route::post('accounts/parent',                              [AdminAccountController::class, 'storeParent']);
+        Route::put('accounts/{account}/toggle',          [AdminAccountController::class, 'toggleActive']);
     });
 
     // ── TEACHER ───────────────────────────
@@ -82,8 +97,30 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── PARENT ────────────────────────────
     Route::middleware('role:parent')
-         ->prefix('parent')
-         ->group(function () {
+     ->prefix('parent')
+     ->group(function () {
+
+    Route::get('children',
+        [ParentController::class, 'children']);
+
+    Route::get('children/{student}/attendance',
+        [ParentController::class, 'attendance']);
+
+    Route::get('children/{student}/memorizations',
+        [ParentController::class, 'memorizations']);
+
+    Route::get('children/{student}/revisions',
+        [ParentController::class, 'revisions']);
+
+    Route::get('children/{student}/payments',
+        [ParentController::class, 'payments']);
+
+    Route::get('children/{student}/ranking',
+        [ParentController::class, 'ranking']);
+
+    Route::get('announcements',
+        [ParentController::class, 'announcements']);
+});
         // Jour 4
     });
 
@@ -91,4 +128,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/evaluations', function () {
         return response()->json(\App\Models\Evaluation::all());
     });
-});

@@ -16,7 +16,7 @@ class MemorizationResource extends JsonResource
             'surah_end'         => $this->surah_end,
             'verse_end'         => $this->verse_end,
             'evaluation_grade'  => $this->evaluation_grade,
-            'evaluation_points' => $this->evaluation_points,
+            'points' => $this->points,
 
             'student' => $this->whenLoaded('student', fn() => [
                 'id'        => $this->student->id,
@@ -25,7 +25,7 @@ class MemorizationResource extends JsonResource
 
             // date vient de la séance liée
             'seance_date' => $this->whenLoaded('seance', fn() =>
-                $this->seance->date?->format('Y-m-d')
+            $this->seance->dateEntry?->date_value?->format('Y-m-d')
             ),
         ];
     }

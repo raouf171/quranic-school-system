@@ -11,9 +11,10 @@ class Halaqa extends Model
     protected $fillable = [
         'teacher_id',
         'name',
+        'gender',
         'schedule',
         'max_students',      // ← FIXED: was 'maxx_students'
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [

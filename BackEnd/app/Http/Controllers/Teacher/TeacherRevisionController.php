@@ -20,16 +20,25 @@ class TeacherRevisionController extends Controller
     }
 
     // GET /api/teacher/seances/{seance}/revisions
-    public function index(Seance $seance): JsonResponse
-    {
-        $revisions = $seance->revisions()
-                            ->with(['student', 'evaluation'])
-                            ->get();
-
-        return response()->json(
-            RevisionResource::collection($revisions)
-        );
+    public function index(Request $request, Seance $seance): JsonResponse
+{
+    $teacher = $this->getTeacher($request);
+    
+    // ✅ Verify teacher owns this seance
+    if ($seance->halaqa->teacher_id !== $teacher->id) {
+        return response()->json([
+            'message' => 'Vous n\'avez pas accès à cette séance'
+        ], 403);
     }
+    
+    $revisions = $seance->revisions()
+                        ->with(['student', 'evaluation'])
+                        ->get();
+
+    return response()->json(
+        RevisionResource::collection($revisions)
+    );
+}
 
     // POST /api/teacher/seances/{seance}/revisions
     public function store(
@@ -37,22 +46,31 @@ class TeacherRevisionController extends Controller
         Seance $seance
     ): JsonResponse {
         $teacher = $this->getTeacher($request);
-
+        
+        // ✅ Verify teacher owns this seance
+        if ($seance->halaqa->teacher_id !== $teacher->id) {
+            return response()->json([
+                'message' => 'Vous ne pouvez pas ajouter des révisions à une séance qui ne vous appartient pas'
+            ], 403);
+        }
+        
         $revision = Revision::create([
             'seance_id'     => $seance->id,
             'student_id'    => $request->student_id,
             'evaluation_id' => $request->evaluation_id,
-            'surah_start' => $request->surah_start,
-            'surah_end'   => $request->surah_end,    
+            'surah_start'   => $request->surah_start,
+            'surah_end'     => $request->surah_end,    
             'verse_start'   => $request->verse_start,
             'verse_end'     => $request->verse_end,
         ]);
-
+    
         $revision->load(['student', 'evaluation']);
-
+    
         return response()->json(
             new RevisionResource($revision),
             201
         );
-    }
-}
+    } }
+
+        
+    

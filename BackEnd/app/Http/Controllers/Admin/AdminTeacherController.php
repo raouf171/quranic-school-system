@@ -32,17 +32,17 @@ class AdminTeacherController extends Controller
 
     // PUT /api/admin/teachers/{teacher}
     public function update(Request $request, Teacher $teacher): JsonResponse
-    {
-        $request->validate([
-            'name'         => 'sometimes|string|max:100',
-            'hiring_date'  => 'sometimes|nullable|date',
-            'is_available' => 'sometimes|boolean',
-        ]);
+{
+    $validated = $request->validate([
+        'name'         => 'sometimes|string|max:100',
+        'hiring_date'  => 'sometimes|nullable|date',
+        'is_available' => 'sometimes|boolean',
+    ]);
 
-        $teacher->update($request->validated());
+    $teacher->update($validated);
 
-        return response()->json(
-            new TeacherResource($teacher->fresh('halaqat'))
-        );
-    }
+    return response()->json(
+        new TeacherResource($teacher->fresh('halaqat'))
+    );
+}
 }

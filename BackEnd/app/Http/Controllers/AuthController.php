@@ -19,7 +19,7 @@ class AuthController extends Controller
         ]);
 
 //chercher
-        $account = Account::where('email', $request->email)->firstOrFail();
+        $account = Account::where('email', $request->email)->first()    ;
 
 //Verifier si le compte existe 
         if (!$account || !Hash::check($request->password, $account->password)) {
@@ -35,7 +35,7 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Supprimer les anciens tokens , had la partie ra7 tkoun f log out , but in case where ...
+
         $account->tokens()->delete();
 
         $token = $account->createToken('auth_token')->plainTextToken;
@@ -58,8 +58,9 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
       
-        $request->user()->currentAccessToken()->delete();
-
+        if ($token = $request->user()->currentAccessToken()) {
+            $token->delete();
+        }
         return response()->json([
             'message' => 'تم تسجيل الخروج بنجاح',
         ], 200);

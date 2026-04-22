@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Attendance;
 use App\Models\Ranking;
 use App\Models\Seance;
+use App\Models\Teacher;use Carbon\Carbon;
 
 class AttendanceObserver
 {
@@ -27,20 +28,16 @@ class AttendanceObserver
 
     private function syncEvaluationPoints(Attendance $attendance): void
     {
-        // Si points déjà définis manuellement → ne pas écraser
-        if ($attendance->evaluation_points > 0) {
-            return;
-        }
-
         $points = match($attendance->status) {
             'present' => 1,
             'absent'  => 0,
+            'excused' => 0,
+            'late'    => 0,
             default   => 0,
         };
 
-        // updateQuietly = sans déclencher l'Observer à nouveau
         $attendance->updateQuietly([
-            'evaluation_points' => $points, // ← correction: points → evaluation_points
+            'points' => $points, 
         ]);
     }
 
@@ -63,10 +60,8 @@ class AttendanceObserver
             $seanceDate = now();
         }
 
-        $periodStart = \Carbon\Carbon::parse($seanceDate)
-                                     ->startOfMonth()
-                                     ->format('Y-m-d');
-        $periodEnd   = \Carbon\Carbon::parse($seanceDate)
+        $periodStart = Carbon::parse($seanceDate)->startOfMonth()->format('Y-m-d');
+        $periodEnd   = Carbon::parse($seanceDate)
                                      ->endOfMonth()
                                      ->format('Y-m-d');
 

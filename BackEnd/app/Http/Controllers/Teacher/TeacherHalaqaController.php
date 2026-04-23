@@ -97,4 +97,25 @@ class TeacherHalaqaController extends Controller
             ],
         ]);
     }
+    // GET /api/teacher/announcements
+public function announcements(): JsonResponse
+{
+    $announcements = \App\Models\Announcement::where(function ($q) {
+                        $q->whereJsonContains('target_roles', 'teacher')
+                          ->orWhereJsonContains('target_roles', 'all');
+                     })
+                     ->where(function ($q) {
+                        $q->whereNull('expiry_date')
+                          ->orWhere('expiry_date', '>=', today());
+                     })
+                     ->latest()
+                     ->get();
+
+    return response()->json($announcements->map(fn($a) => [
+        'id'         => $a->id,
+        'title'      => $a->title,
+        'content'    => $a->content,
+        'created_at' => $a->created_at->format('Y-m-d H:i'),
+    ]));
+}
 }

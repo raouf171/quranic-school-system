@@ -12,6 +12,10 @@ use App\Http\Controllers\Teacher\TeacherRevisionController;
 use App\Http\Controllers\Parent\ParentController;
 use App\Http\Controllers\Admin\AdminAccountController;
 use App\Http\Controllers\Admin\AdminParentController;
+use App\Http\Controllers\Admin\AdminPaymentController;
+
+use App\Http\Controllers\Admin\AdminAnnouncementController;
+use App\Http\Controllers\Admin\AdminClassroomController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -30,26 +34,46 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── ADMIN ─────────────────────────────
     Route::middleware('role:admin')
-         ->prefix('admin')
-         ->group(function () {
-        Route::get('students/form-enums', [AdminStudentController::class, 'formEnums']);
-        Route::post('students/{student}/photo', [AdminStudentController::class, 'uploadPhoto']);
-        Route::delete('students/{student}/photo', [AdminStudentController::class, 'deletePhoto']);
-        Route::put('parents/{parent}', [AdminParentController::class, 'update']);
+     ->prefix('admin')
+     ->group(function () {
 
-        Route::apiResource('students', AdminStudentController::class);
-        Route::apiResource('halaqat',  AdminHalaqaController::class);
-        Route::get('halaqat/{halaqa}/students', [AdminHalaqaController::class, 'students']);
-        Route::get('teachers',           [AdminTeacherController::class, 'index']);
-        Route::get('teachers/{teacher}', [AdminTeacherController::class, 'show']);
-        Route::put('teachers/{teacher}', [AdminTeacherController::class, 'update']);
+    Route::get('students/form-enums', [AdminStudentController::class, 'formEnums']);
+    Route::post('students/{student}/photo', [AdminStudentController::class, 'uploadPhoto']);
+    Route::delete('students/{student}/photo', [AdminStudentController::class, 'deletePhoto']);
+    Route::put('parents/{parent}', [AdminParentController::class, 'update']);
+    Route::get('students/{student}/payments', [AdminPaymentController::class, 'studentPayments']);
 
+    // Students
+    Route::apiResource('students', AdminStudentController::class);
 
-        Route::get('accounts',                           [AdminAccountController::class, 'index']);
-        Route::post('accounts/teacher',                  [AdminAccountController::class, 'storeTeacher']);
-        Route::post('accounts/parent',                              [AdminAccountController::class, 'storeParent']);
-        Route::put('accounts/{account}/toggle',          [AdminAccountController::class, 'toggleActive']);
-    });
+    // Halaqat
+    Route::apiResource('halaqat', AdminHalaqaController::class);
+    Route::get('halaqat/{halaqa}/students',
+        [AdminHalaqaController::class, 'students']);
+
+    // Teachers (lecture + update)
+    Route::get('teachers',              [AdminTeacherController::class, 'index']);
+    Route::get('teachers/{teacher}',    [AdminTeacherController::class, 'show']);
+    Route::put('teachers/{teacher}',    [AdminTeacherController::class, 'update']);
+
+    // Accounts — Factory Pattern
+    Route::get('accounts',                    [AdminAccountController::class, 'index']);
+    Route::post('accounts/teacher',           [AdminAccountController::class, 'storeTeacher']);
+    Route::post('accounts/parent',            [AdminAccountController::class, 'storeParent']);
+    Route::put('accounts/{account}/toggle',   [AdminAccountController::class, 'toggleActive']);
+
+    // Payments
+    Route::get('payments',                      [AdminPaymentController::class, 'index']);
+    Route::post('payments',                     [AdminPaymentController::class, 'store']);
+    Route::get('payments/{payment}',            [AdminPaymentController::class, 'show']);
+    Route::put('payments/{payment}',            [AdminPaymentController::class, 'update']);
+
+    // Announcements
+    Route::apiResource('announcements', AdminAnnouncementController::class);
+
+    // Classrooms
+    Route::apiResource('classrooms', AdminClassroomController::class);
+});
 
     // ── TEACHER ───────────────────────────
     Route::middleware('role:teacher')
@@ -93,6 +117,9 @@ Route::middleware('auth:sanctum')->group(function () {
             [TeacherRevisionController::class, 'index']);
         Route::post('seances/{seance}/revisions',
             [TeacherRevisionController::class, 'store']);
+
+        Route::get('announcements',
+            [TeacherHalaqaController::class, 'announcements']);
     });
 
     // ── PARENT ────────────────────────────

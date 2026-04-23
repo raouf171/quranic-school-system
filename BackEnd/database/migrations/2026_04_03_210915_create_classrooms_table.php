@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->string('name',50) ; 
             
-            $table ->string ('building' , 10 /*length*/)->nullable() ; 
+            $table ->string ('building' )->nullable() ; 
 
             $table ->unsignedInteger('capacity')->default(30) ; 
 

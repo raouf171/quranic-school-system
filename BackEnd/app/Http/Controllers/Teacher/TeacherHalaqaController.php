@@ -84,6 +84,7 @@ class TeacherHalaqaController extends Controller
               'halaqa' => [
                     'id'   => $nextSeance->halaqa->id,
                     'name' => $nextSeance->halaqa->name,
+                    'schedule' => $nextSeance->halaqa->schedule,
                 ],
                 'classroom' => $nextSeance->classroom ? [
                     'id'       => $nextSeance->classroom->id,

@@ -39,6 +39,37 @@ class Halaqa extends Model
         return $this->hasMany(Seance::class, 'halaqa_id');
     }
 
+    public function nextSeance(): ?Seance
+    {
+        return $this->seances()
+            ->join('dates', 'seances.date_id', '=', 'dates.id')
+            ->whereDate('dates.date_value', '>=', today())
+            ->orderBy('dates.date_value')
+            ->select('seances.*')
+            ->with(['dateEntry', 'classroom'])
+            ->first();
+    }
+
+    public function getNextSeanceSummaryAttribute(): ?array
+    {
+        $nextSeance = $this->nextSeance();
+
+        if (! $nextSeance) {
+            return null;
+        }
+
+        return [
+            'id' => $nextSeance->id,
+            'date' => $nextSeance->dateEntry?->date_value?->format('Y-m-d'),
+            'schedule' => $this->schedule,
+            'classroom' => $nextSeance->classroom ? [
+                'id' => $nextSeance->classroom->id,
+                'name' => $nextSeance->classroom->name,
+                'building' => $nextSeance->classroom->building,
+            ] : null,
+        ];
+    }
+
     // Check if Halaqa is full
     public function isFull(): bool
     {

@@ -25,6 +25,8 @@ class StudentResource extends JsonResource
                 'id'     => $this->halaqa->id,
                 'name'   => $this->halaqa->name,
                 'gender' => $this->halaqa->gender,
+                'schedule' => $this->halaqa->schedule,
+                'next_seance' => $this->halaqa->next_seance_summary,
             ]),
 
             'parent' => $this->whenLoaded('parent', fn() => [

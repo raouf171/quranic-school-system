@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schema; // ✅ ADD THIS
 
 // Repositories
 use App\Repositories\Interfaces\StudentRepositoryInterface;
@@ -13,14 +14,14 @@ use App\Repositories\StudentRepository;
 use App\Repositories\HalaqaRepository;
 use App\Repositories\PaymentRepository;
 
-use App\Models\Revision;
-use App\Observers\RevisionObserver;
 // Models
+use App\Models\Revision;
 use App\Models\Attendance;
 use App\Models\Memorization;
 use App\Models\Payment;
 
 // Observers
+use App\Observers\RevisionObserver;
 use App\Observers\AttendanceObserver;
 use App\Observers\MemorizationObserver;
 use App\Observers\PaymentObserver;
@@ -29,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Repository bindings (Jour 2)
+        // Repository bindings
         $this->app->bind(StudentRepositoryInterface::class, StudentRepository::class);
         $this->app->bind(HalaqaRepositoryInterface::class, HalaqaRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
@@ -37,11 +38,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Enregistrer les Observers
+        // ✅ FIX for MySQL key length issue
+        Schema::defaultStringLength(191);
+
+        // Observers
         Attendance::observe(AttendanceObserver::class);
         Memorization::observe(MemorizationObserver::class);
         Payment::observe(PaymentObserver::class);
-        Revision::observe(RevisionObserver::class);  
-
+        Revision::observe(RevisionObserver::class);
     }
 }

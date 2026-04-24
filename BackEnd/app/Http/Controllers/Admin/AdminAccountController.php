@@ -18,15 +18,14 @@ class AdminAccountController extends Controller
     {
         $result = UserFactory::createTeacher($request->validated());
 
-        return response()->json([
-            'message' => 'تم إنشاء حساب المعلم بنجاح',
+        return $this->apiSuccess([
             'account' => [
                 'id'    => $result['account']->id,
                 'email' => $result['account']->email,
                 'role'  => $result['account']->role,
             ],
             'teacher' => new TeacherResource($result['teacher']),
-        ], 201);
+        ], 'تم إنشاء حساب المعلم بنجاح', 201);
     }
 
     // POST /api/admin/accounts/parent
@@ -34,15 +33,14 @@ class AdminAccountController extends Controller
     {
         $result = UserFactory::createParent($request->validated());
 
-        return response()->json([
-            'message' => 'تم إنشاء حساب ولي الأمر بنجاح',
+        return $this->apiSuccess([
             'account' => [
                 'id'    => $result['account']->id,
                 'email' => $result['account']->email,
                 'role'  => $result['account']->role,
             ],
             'parent' => new ParentResource($result['parent']),
-        ], 201);
+        ], 'تم إنشاء حساب ولي الأمر بنجاح', 201);
     }
 
     // GET /api/admin/accounts
@@ -52,7 +50,17 @@ class AdminAccountController extends Controller
                            ->latest()
                            ->paginate(15);
 
-        return response()->json($accounts);
+        return $this->apiSuccess(
+            $accounts->items(),
+            null,
+            200,
+            [
+                'current_page' => $accounts->currentPage(),
+                'last_page' => $accounts->lastPage(),
+                'per_page' => $accounts->perPage(),
+                'total' => $accounts->total(),
+            ]
+        );
     }
 
     // PUT /api/admin/accounts/{account}/toggle
@@ -60,9 +68,8 @@ class AdminAccountController extends Controller
     {
         $account->update(['is_active' => !$account->is_active]);
 
-        return response()->json([
-            'message'   => $account->is_active ? 'تم تفعيل الحساب' : 'تم تعطيل الحساب',
+        return $this->apiSuccess([
             'is_active' => $account->is_active,
-        ]);
+        ], $account->is_active ? 'تم تفعيل الحساب' : 'تم تعطيل الحساب');
     }
 }

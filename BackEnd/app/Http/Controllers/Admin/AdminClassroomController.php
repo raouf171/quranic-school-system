@@ -17,14 +17,16 @@ class AdminClassroomController extends Controller
                                ->orderBy('name')
                                ->get();
 
-        return response()->json($classrooms->map(fn($c) => [
-            'id'            => $c->id,
-            'name'          => $c->name,
-            'building'      => $c->building,
-            'capacity'      => $c->capacity,
-            'is_available'  => $c->is_available,
-            'seances_count' => $c->seances_count,
-        ]));
+        return $this->apiSuccess(
+            $classrooms->map(fn($c) => [
+                'id'            => $c->id,
+                'name'          => $c->name,
+                'building'      => $c->building,
+                'capacity'      => $c->capacity,
+                'is_available'  => $c->is_available,
+                'seances_count' => $c->seances_count,
+            ])
+        );
     }
 
     // POST /api/admin/classrooms
@@ -32,10 +34,11 @@ class AdminClassroomController extends Controller
     {
         $classroom = Classroom::create($request->validated());
 
-        return response()->json([
-            'message'   => 'تم إنشاء القاعة بنجاح',
-            'classroom' => $classroom,
-        ], 201);
+        return $this->apiSuccess(
+            $classroom,
+            'تم إنشاء القاعة بنجاح',
+            201
+        );
     }
 
     // GET /api/admin/classrooms/{classroom}
@@ -43,7 +46,7 @@ class AdminClassroomController extends Controller
     {
         $classroom->loadCount('seances');
 
-        return response()->json($classroom);
+        return $this->apiSuccess($classroom);
     }
 
     // PUT /api/admin/classrooms/{classroom}
@@ -53,10 +56,10 @@ class AdminClassroomController extends Controller
     ): JsonResponse {
         $classroom->update($request->validated());
 
-        return response()->json([
-            'message'   => 'تم تحديث القاعة',
-            'classroom' => $classroom->fresh(),
-        ]);
+        return $this->apiSuccess(
+            $classroom->fresh(),
+            'تم تحديث القاعة'
+        );
     }
 
     public function destroy(Classroom $classroom): JsonResponse
@@ -69,8 +72,9 @@ class AdminClassroomController extends Controller
 
         $classroom->delete();
 
-        return response()->json([
-            'message' => 'تم حذف القاعة',
-        ]);
+        return $this->apiSuccess(
+            null,
+            'تم حذف القاعة'
+        );
     }
 }

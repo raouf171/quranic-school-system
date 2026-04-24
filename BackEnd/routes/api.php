@@ -153,5 +153,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── TOUS LES RÔLES ────────────────────
     Route::get('/evaluations', function () {
-        return response()->json(\App\Models\Evaluation::all());
+        return response()->json([
+            'data' => \App\Models\Evaluation::all(),
+        ]);
     });

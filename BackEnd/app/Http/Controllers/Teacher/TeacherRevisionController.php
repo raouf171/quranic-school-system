@@ -35,7 +35,7 @@ class TeacherRevisionController extends Controller
                         ->with(['student', 'evaluation'])
                         ->get();
 
-    return response()->json(
+    return $this->apiSuccess(
         RevisionResource::collection($revisions)
     );
 }
@@ -66,8 +66,9 @@ class TeacherRevisionController extends Controller
     
         $revision->load(['student', 'evaluation']);
     
-        return response()->json(
+        return $this->apiSuccess(
             new RevisionResource($revision),
+            null,
             201
         );
     } }

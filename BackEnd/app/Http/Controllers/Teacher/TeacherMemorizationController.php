@@ -34,7 +34,7 @@ class TeacherMemorizationController extends Controller
                             ->with(['student', 'evaluation'])
                             ->get();
 
-    return response()->json(
+    return $this->apiSuccess(
         MemorizationResource::collection($memorizations)
     );
 }
@@ -67,8 +67,9 @@ class TeacherMemorizationController extends Controller
     
         $memorization->load(['student', 'evaluation']);
     
-        return response()->json(
+        return $this->apiSuccess(
             new MemorizationResource($memorization),
+            null,
             201
         );
     }

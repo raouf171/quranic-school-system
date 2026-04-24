@@ -15,6 +15,6 @@ class AdminParentController extends Controller
     {
         $parent->update($request->validated());
 
-        return response()->json(new ParentResource($parent->fresh()));
+        return $this->apiSuccess(new ParentResource($parent->fresh()));
     }
 }

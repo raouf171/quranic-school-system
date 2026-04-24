@@ -9,6 +9,9 @@ class HalaqaResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $teacher = $this->relationLoaded('teacher') ? $this->teacher : null;
+        $students = $this->relationLoaded('students') ? $this->students : null;
+
         return [
             'id'           => $this->id,
             'name'         => $this->name,
@@ -22,18 +25,18 @@ class HalaqaResource extends JsonResource
             // whenCounted fonctionne avec withCount('students')
             'students_count' => $this->whenCounted('students'),
 
-            'teacher' => $this->whenLoaded('teacher', fn() => [
-                'id'   => $this->teacher->id,
-                'name' => $this->teacher->name,
-            ]),
+            'teacher' => $teacher ? [
+                'id'   => $teacher->id,
+                'name' => $teacher->name,
+            ] : null,
 
-            'students' => $this->whenLoaded('students', fn() =>
-                $this->students->map(fn($s) => [
+            'students' => $students
+                ? $students->map(fn($s) => [
                     'id'        => $s->id,
                     'full_name' => $s->full_name,
                     'fee_status'=> $s->fee_status,
                 ])
-            ),
+                : null,
         ];
     }
 }

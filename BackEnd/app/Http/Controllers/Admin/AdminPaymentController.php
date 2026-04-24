@@ -30,7 +30,7 @@ class AdminPaymentController extends Controller
             $query->where('student_id', $request->student_id);
         }
 
-        return response()->json(
+        return $this->apiSuccess(
             PaymentResource::collection($query->paginate(20))
         );
     }
@@ -50,16 +50,17 @@ class AdminPaymentController extends Controller
 
         $payment = Payment::create($request->validated())->load('student');
 
-        return response()->json([
-            'message' => 'تم إنشاء سجل الدفع',
-            'payment' => new PaymentResource($payment),
-        ], 201);
+        return $this->apiSuccess(
+            new PaymentResource($payment),
+            'تم إنشاء سجل الدفع',
+            201
+        );
     }
 
     // GET /api/admin/payments/{payment}
     public function show(Payment $payment): JsonResponse
     {
-        return response()->json(
+        return $this->apiSuccess(
             new PaymentResource($payment->load('student'))
         );
     }
@@ -88,10 +89,10 @@ class AdminPaymentController extends Controller
 
         $payment->update($data);
 
-        return response()->json([
-            'message' => 'تم تحديث حالة الدفع',
-            'payment' => new PaymentResource($payment->fresh('student')),
-        ]);
+        return $this->apiSuccess(
+            new PaymentResource($payment->fresh('student')),
+            'تم تحديث حالة الدفع'
+        );
     }
 
     // GET /api/admin/students/{student}/payments
@@ -101,7 +102,7 @@ class AdminPaymentController extends Controller
                            ->orderBy('month', 'desc')
                            ->get();
 
-        return response()->json([
+        return $this->apiSuccess([
             'student'  => [
                 'id'         => $student->id,
                 'full_name'  => $student->full_name,

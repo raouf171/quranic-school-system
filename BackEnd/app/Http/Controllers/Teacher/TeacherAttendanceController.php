@@ -30,7 +30,7 @@ class TeacherAttendanceController extends Controller
                               ->with('student')
                               ->get();
 
-        return response()->json(
+        return $this->apiSuccess(
             AttendanceResource::collection($attendances)
         );
     }
@@ -75,12 +75,13 @@ class TeacherAttendanceController extends Controller
             return $result;
         });
 
-        return response()->json([
-            'message'     => 'تم تسجيل الحضور بنجاح',
-            'attendances' => AttendanceResource::collection(
+        return $this->apiSuccess(
+            AttendanceResource::collection(
                 collect($attendances)
             ),
-        ], 201);
+            'تم تسجيل الحضور بنجاح',
+            201
+        );
     }
 
     // PUT /api/teacher/attendance/{attendance}
@@ -102,14 +103,14 @@ class TeacherAttendanceController extends Controller
         if (!$attendance) {
             return response()->json([
                 'message' => 'Présence non trouvée ou accès non autorisé'
-            ], 403);
+            ], 404);
         }
     
         $attendance->update([
             'status' => $request->status,
         ]);
     
-        return response()->json(
+        return $this->apiSuccess(
             new AttendanceResource($attendance->load('student'))
         );
     }    

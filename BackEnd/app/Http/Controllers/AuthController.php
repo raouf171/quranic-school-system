@@ -43,11 +43,11 @@ class AuthController extends Controller
         $profile = $account->getProfile();
 
         // L'app mobile stocke token + role pour navigation
-        return response()->json([
+        return $this->apiSuccess([
             'token'   => $token,
             'role'    => $account->role,
             'profile' => $profile,
-        ], 200);
+        ]);
     }
 
  
@@ -61,9 +61,10 @@ class AuthController extends Controller
         if ($token = $request->user()->currentAccessToken()) {
             $token->delete();
         }
-        return response()->json([
-            'message' => 'تم تسجيل الخروج بنجاح',
-        ], 200);
+        return $this->apiSuccess(
+            null,
+            'تم تسجيل الخروج بنجاح'
+        );
     }
 
     // GET /api/me 
@@ -74,10 +75,10 @@ class AuthController extends Controller
 
         $profile = $account->getProfile();
 
-        return response()->json([
+        return $this->apiSuccess([
             'role'    => $account->role,
             'email'   => $account->email,
             'profile' => $profile,
-        ], 200);
+        ]);
     }
 }

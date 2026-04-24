@@ -26,7 +26,7 @@ class AdminAnnouncementController extends Controller
                                      ->latest()
                                      ->paginate(15);
 
-        return response()->json(
+        return $this->apiSuccess(
             AnnouncementResource::collection($announcements)
         );
     }
@@ -44,8 +44,9 @@ class AdminAnnouncementController extends Controller
 
         $announcement->load('admin');
 
-        return response()->json(
+        return $this->apiSuccess(
             new AnnouncementResource($announcement),
+            null,
             201
         );
     }
@@ -53,7 +54,7 @@ class AdminAnnouncementController extends Controller
     // GET /api/admin/announcements/{announcement}
     public function show(Announcement $announcement): JsonResponse
     {
-        return response()->json(
+        return $this->apiSuccess(
             new AnnouncementResource($announcement->load('admin'))
         );
     }
@@ -73,7 +74,7 @@ class AdminAnnouncementController extends Controller
 
         $announcement->update($request->validated());
 
-        return response()->json(
+        return $this->apiSuccess(
             new AnnouncementResource($announcement->fresh(['admin']))
         );
     }
@@ -91,8 +92,9 @@ class AdminAnnouncementController extends Controller
 
         $announcement->delete();
 
-        return response()->json([
-            'message' => 'تم حذف الإعلان',
-        ]);
+        return $this->apiSuccess(
+            null,
+            'تم حذف الإعلان'
+        );
     }
 }

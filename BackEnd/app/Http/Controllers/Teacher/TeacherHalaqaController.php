@@ -33,7 +33,7 @@ class TeacherHalaqaController extends Controller
                          ->with('students')
                          ->get();
 
-        return response()->json(
+        return $this->apiSuccess(
             HalaqaResource::collection($halaqat)
         );
     }
@@ -56,7 +56,7 @@ class TeacherHalaqaController extends Controller
                            ->orderBy('full_name')
                            ->get();
 
-        return response()->json(
+        return $this->apiSuccess(
             StudentResource::collection($students)
         );
     }
@@ -71,13 +71,12 @@ class TeacherHalaqaController extends Controller
         $nextSeance = $teacher->getNextSeance();
 
         if (!$nextSeance) {
-            return response()->json([
-                'message' => 'لا توجد جلسات قادمة',
+            return $this->apiSuccess([
                 'seance'  => null,
-            ]);
+            ], 'لا توجد جلسات قادمة');
         }
 
-        return response()->json([
+        return $this->apiSuccess([
             'seance' => [
                 'id'   => $nextSeance->id,
                'date' => $nextSeance->dateEntry?->date_value?->format('Y-m-d'),  
@@ -94,7 +93,29 @@ class TeacherHalaqaController extends Controller
                 'students_count' => $nextSeance->halaqa
                                                ->students()
                                                ->count(),
+                'created_at' => $nextSeance->created_at?->toISOString(),
             ],
         ]);
     }
+    // GET /api/teacher/announcements
+public function announcements(): JsonResponse
+{
+    $announcements = \App\Models\Announcement::where(function ($q) {
+                        $q->whereJsonContains('target_roles', 'teacher')
+                          ->orWhereJsonContains('target_roles', 'all');
+                     })
+                     ->where(function ($q) {
+                        $q->whereNull('expiry_date')
+                          ->orWhere('expiry_date', '>=', today());
+                     })
+                     ->latest()
+                     ->get();
+
+    return $this->apiSuccess($announcements->map(fn($a) => [
+        'id'         => $a->id,
+        'title'      => $a->title,
+        'content'    => $a->content,
+        'created_at' => $a->created_at?->toISOString(),
+    ]));
+}
 }

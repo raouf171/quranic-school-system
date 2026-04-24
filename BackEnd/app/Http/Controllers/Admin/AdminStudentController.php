@@ -23,7 +23,7 @@ class AdminStudentController extends Controller
     // GET /api/admin/students/form-enums
     public function formEnums(): JsonResponse
     {
-        return response()->json([
+        return $this->apiSuccess([
             'gender' => [
                 ['value' => 'male', 'label' => 'Garçon / ذكر'],
                 ['value' => 'female', 'label' => 'Fille / أنثى'],
@@ -61,7 +61,7 @@ class AdminStudentController extends Controller
 
         $this->studentRepository->update($student, ['photo_path' => $path]);
 
-        return response()->json(
+        return $this->apiSuccess(
             new StudentResource($student->fresh(['halaqa', 'parent']))
         );
     }
@@ -74,7 +74,7 @@ class AdminStudentController extends Controller
             $this->studentRepository->update($student, ['photo_path' => null]);
         }
 
-        return response()->json(
+        return $this->apiSuccess(
             new StudentResource($student->fresh(['halaqa', 'parent']))
         );
     }
@@ -87,14 +87,14 @@ class AdminStudentController extends Controller
         // Si paramètre search présent → recherche
         if ($request->has('search') && $request->search) {
             $students = $this->studentRepository->search($request->search);
-            return response()->json(
+            return $this->apiSuccess(
                 StudentResource::collection($students)
             );
         }
 
         // Sinon → liste paginée
         $students = $this->studentRepository->getAll(15);
-        return response()->json(
+        return $this->apiSuccess(
             StudentResource::collection($students)
         );
     }
@@ -110,8 +110,9 @@ class AdminStudentController extends Controller
         );
 
         // 201 = Created (pas 200)
-        return response()->json(
+        return $this->apiSuccess(
             new StudentResource($student),
+            null,
             201
         );
     }
@@ -129,7 +130,7 @@ class AdminStudentController extends Controller
             ], 404);
         }
 
-        return response()->json(new StudentResource($student));
+        return $this->apiSuccess(new StudentResource($student));
     }
 
     // PUT /api/admin/students/{student}
@@ -142,7 +143,7 @@ class AdminStudentController extends Controller
             $request->validated()
         );
 
-        return response()->json(new StudentResource($updated));
+        return $this->apiSuccess(new StudentResource($updated));
     }
 
     // DELETE /api/admin/students/{student}
@@ -154,8 +155,9 @@ class AdminStudentController extends Controller
 
         $this->studentRepository->delete($student);
 
-        return response()->json([
-            'message' => 'تم حذف الطالب بنجاح',
-        ], 200);
+        return $this->apiSuccess(
+            null,
+            'تم حذف الطالب بنجاح'
+        );
     }
 }

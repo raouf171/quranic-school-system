@@ -9,6 +9,9 @@ class RevisionResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $student = $this->relationLoaded('student') ? $this->student : null;
+        $seance = $this->relationLoaded('seance') ? $this->seance : null;
+
         return [
             'id'                => $this->id,
             'surah_start'       => $this->surah_start,
@@ -18,14 +21,14 @@ class RevisionResource extends JsonResource
             'evaluation_grade'  => $this->evaluation_grade,
             'points'=> $this->points,
 
-            'student' => $this->whenLoaded('student', fn() => [
-                'id'        => $this->student->id,
-                'full_name' => $this->student->full_name,
-            ]),
+            'student' => $student ? [
+                'id'        => $student->id,
+                'full_name' => $student->full_name,
+            ] : null,
 
-            'seance_date' => $this->whenLoaded('seance', fn() =>
-            $this->seance->dateEntry?->date_value?->format('Y-m-d')
-            ),
+            'seance_date' => $seance
+                ? $seance->dateEntry?->date_value?->format('Y-m-d')
+                : null,
         ];
     }
 }

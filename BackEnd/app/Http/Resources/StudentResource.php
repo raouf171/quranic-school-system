@@ -9,6 +9,9 @@ class StudentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $halaqa = $this->relationLoaded('halaqa') ? $this->halaqa : null;
+        $parent = $this->relationLoaded('parent') ? $this->parent : null;
+
         return [
             'id'                    => $this->id,
             'full_name'             => $this->full_name,
@@ -21,19 +24,19 @@ class StudentResource extends JsonResource
             'social_state'          => $this->social_state,
             'fee_status'            => $this->fee_status,
 
-            'halaqa' => $this->whenLoaded('halaqa', fn() => [
-                'id'     => $this->halaqa->id,
-                'name'   => $this->halaqa->name,
-                'gender' => $this->halaqa->gender,
-                'schedule' => $this->halaqa->schedule,
-                'next_seance' => $this->halaqa->next_seance_summary,
-            ]),
+            'halaqa' => $halaqa ? [
+                'id'     => $halaqa->id,
+                'name'   => $halaqa->name,
+                'gender' => $halaqa->gender,
+                'schedule' => $halaqa->schedule,
+                'next_seance' => $halaqa->next_seance_summary,
+            ] : null,
 
-            'parent' => $this->whenLoaded('parent', fn() => [
-                'id'    => $this->parent->id,
-                'name'  => $this->parent->name,
-                'phone' => $this->parent->phone,
-            ]),
+            'parent' => $parent ? [
+                'id'    => $parent->id,
+                'name'  => $parent->name,
+                'phone' => $parent->phone,
+            ] : null,
         ];
     }
 }

@@ -40,7 +40,7 @@ class TeacherSeanceController extends Controller
             ->with(['classroom', 'dateEntry'])
             ->paginate(10);
 
-        return response()->json(
+        return $this->apiSuccess(
             SeanceResource::collection($seances)
         );
     }
@@ -82,8 +82,9 @@ class TeacherSeanceController extends Controller
         // Charger les relations pour la réponse
         $seance->load(['halaqa', 'classroom', 'teacher']);
 
-        return response()->json(
+        return $this->apiSuccess(
             new SeanceResource($seance),
+            null,
             201
         );
     }
@@ -113,6 +114,6 @@ class TeacherSeanceController extends Controller
             'revisions.student',
         ]);
 
-        return response()->json(new SeanceResource($seance));
+        return $this->apiSuccess(new SeanceResource($seance));
     }
 }

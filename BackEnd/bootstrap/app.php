@@ -41,7 +41,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ) {
             if ($request->is('api/*')) {
                 return response()->json([
+                    'success' => false,
                     'message' => 'يجب تسجيل الدخول أولاً',
+                    'errors' => null,
                 ], 401);
             }
         });
@@ -52,9 +54,49 @@ return Application::configure(basePath: dirname(__DIR__))
         ) {
             if ($request->is('api/*')) {
                 return response()->json([
+                    'success' => false,
                     'message' => 'بيانات غير صحيحة',
                     'errors'  => $e->errors(),
                 ], 422);
+            }
+        });
+
+        $exceptions->render(function (
+            \Illuminate\Auth\Access\AuthorizationException $e,
+            \Illuminate\Http\Request $request
+        ) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'غير مصرح لك بالوصول',
+                    'errors' => null,
+                ], 403);
+            }
+        });
+
+        $exceptions->render(function (
+            \Illuminate\Database\Eloquent\ModelNotFoundException $e,
+            \Illuminate\Http\Request $request
+        ) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'العنصر المطلوب غير موجود',
+                    'errors' => null,
+                ], 404);
+            }
+        });
+
+        $exceptions->render(function (
+            \Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e,
+            \Illuminate\Http\Request $request
+        ) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'المسار المطلوب غير موجود',
+                    'errors' => null,
+                ], 404);
             }
         });
     })->create();

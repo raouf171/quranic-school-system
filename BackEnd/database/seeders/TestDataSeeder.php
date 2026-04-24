@@ -3,21 +3,25 @@
 namespace Database\Seeders;
 
 use App\Models\Account;
+use App\Models\Admin;
+use App\Models\Announcement;
+use App\Models\Classroom;
+use App\Models\DateEntry;
 use App\Models\Halaqa;
 use App\Models\ParentProfile;
+use App\Models\Payment;
+use App\Models\Seance;
 use App\Models\Student;
 use App\Models\Teacher;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use App\Models\Payment;
-use App\Models\Announcement;
-use App\Models\Admin;
 
 class TestDataSeeder extends Seeder
 {
     public function run(): void
     {
         // ════════════════════════════════════════
-        // 2 TEACHERS
+        // 2 TEACHERS (noms / emails inchangés)
         // ════════════════════════════════════════
 
         $teacher1Account = Account::firstOrCreate(
@@ -57,7 +61,38 @@ class TestDataSeeder extends Seeder
         );
 
         // ════════════════════════════════════════
-        // 2 HALAQAT
+        // CLASSROOMS (pour séances / next-seance)
+        // ════════════════════════════════════════
+
+        $classroomA = Classroom::firstOrCreate(
+            ['name' => 'Salle A'],
+            [
+                'building'     => 'Bâtiment Principal',
+                'capacity'     => 25,
+                'is_available' => true,
+            ]
+        );
+
+        $classroomB = Classroom::firstOrCreate(
+            ['name' => 'Salle B'],
+            [
+                'building'     => 'Bâtiment Principal',
+                'capacity'     => 20,
+                'is_available' => true,
+            ]
+        );
+
+        $classroomC = Classroom::firstOrCreate(
+            ['name' => 'Salle C'],
+            [
+                'building'     => 'Annexe',
+                'capacity'     => 15,
+                'is_available' => true,
+            ]
+        );
+
+        // ════════════════════════════════════════
+        // 2 HALAQAT (noms inchangés)
         // ════════════════════════════════════════
 
         $halaqa1 = Halaqa::updateOrCreate(
@@ -83,7 +118,7 @@ class TestDataSeeder extends Seeder
         );
 
         // ════════════════════════════════════════
-        // 3 PARENTS
+        // 3 PARENTS (noms / emails inchangés)
         // ════════════════════════════════════════
 
         $parent1Account = Account::firstOrCreate(
@@ -95,7 +130,7 @@ class TestDataSeeder extends Seeder
             ]
         );
 
-        $parent1 = ParentProfile::firstOrCreate(
+        $parent1 = ParentProfile::updateOrCreate(
             ['account_id' => $parent1Account->id],
             [
                 'name'       => 'Mohamed Mansouri',
@@ -114,7 +149,7 @@ class TestDataSeeder extends Seeder
             ]
         );
 
-        $parent2 = ParentProfile::firstOrCreate(
+        $parent2 = ParentProfile::updateOrCreate(
             ['account_id' => $parent2Account->id],
             [
                 'name'       => 'Karim Boudiaf',
@@ -133,7 +168,7 @@ class TestDataSeeder extends Seeder
             ]
         );
 
-        $parent3 = ParentProfile::firstOrCreate(
+        $parent3 = ParentProfile::updateOrCreate(
             ['account_id' => $parent3Account->id],
             [
                 'name'       => 'Ali Cherif',
@@ -144,10 +179,9 @@ class TestDataSeeder extends Seeder
         );
 
         // ════════════════════════════════════════
-        // 6 STUDENTS
+        // 6 STUDENTS (noms inchangés)
         // ════════════════════════════════════════
 
-        // Parent 1 → حلقة الفجر (filles) + حلقة النور (garçons)
         Student::updateOrCreate(
             [
                 'full_name' => 'Ahmed Mansouri',
@@ -180,7 +214,6 @@ class TestDataSeeder extends Seeder
             ]
         );
 
-        // Parent 2 → 1 fille (halaqa filles), 1 garçon (halaqa garçons)
         Student::updateOrCreate(
             [
                 'full_name' => 'Hamza Boudiaf',
@@ -213,7 +246,6 @@ class TestDataSeeder extends Seeder
             ]
         );
 
-        // Parent 3
         Student::updateOrCreate(
             [
                 'full_name' => 'Youssef Cherif',
@@ -246,59 +278,152 @@ class TestDataSeeder extends Seeder
             ]
         );
 
-        $this->command->info('✅ TestDataSeeder: 2 teachers, 2 halaqat, 3 parents, 6 students créés');
+        // ════════════════════════════════════════
+        // DATES + SÉANCES (futures = tests next_seance / teacher)
+        // ════════════════════════════════════════
+
+        $tomorrow = Carbon::tomorrow()->toDateString();
+        $inThreeDays = Carbon::today()->addDays(3)->toDateString();
+        $nextWeek = Carbon::today()->addWeek()->toDateString();
+        $yesterday = Carbon::yesterday()->toDateString();
+
+        $dateTomorrow = DateEntry::firstOrCreate(
+            ['date_value' => $tomorrow, 'created_by' => $teacher1->id],
+            []
+        );
+        $dateInThree = DateEntry::firstOrCreate(
+            ['date_value' => $inThreeDays, 'created_by' => $teacher2->id],
+            []
+        );
+        $dateNextWeek = DateEntry::firstOrCreate(
+            ['date_value' => $nextWeek, 'created_by' => $teacher1->id],
+            []
+        );
+        $dateYesterday = DateEntry::firstOrCreate(
+            ['date_value' => $yesterday, 'created_by' => $teacher1->id],
+            []
+        );
+
+        Seance::firstOrCreate(
+            [
+                'halaqa_id' => $halaqa1->id,
+                'date_id'   => $dateTomorrow->id,
+            ],
+            [
+                'created_by'   => $teacher1->id,
+                'classroom_id' => $classroomA->id,
+                'notes'        => 'Séance test — حلقة الفجر',
+            ]
+        );
+
+        Seance::firstOrCreate(
+            [
+                'halaqa_id' => $halaqa1->id,
+                'date_id'   => $dateNextWeek->id,
+            ],
+            [
+                'created_by'   => $teacher1->id,
+                'classroom_id' => $classroomB->id,
+                'notes'        => 'Séance suivante — حلقة الفجر',
+            ]
+        );
+
+        Seance::firstOrCreate(
+            [
+                'halaqa_id' => $halaqa2->id,
+                'date_id'   => $dateInThree->id,
+            ],
+            [
+                'created_by'   => $teacher2->id,
+                'classroom_id' => $classroomC->id,
+                'notes'        => 'Séance test — حلقة النور',
+            ]
+        );
+
+        Seance::firstOrCreate(
+            [
+                'halaqa_id' => $halaqa1->id,
+                'date_id'   => $dateYesterday->id,
+            ],
+            [
+                'created_by'   => $teacher1->id,
+                'classroom_id' => $classroomA->id,
+                'notes'        => 'Séance passée (historique)',
+            ]
+        );
+
+        // ════════════════════════════════════════
+        // PAYMENTS (par élève — mois cohérents année courante)
+        // ════════════════════════════════════════
+
+        $monthPaid = Carbon::now()->subMonth()->format('Y-m');
+        $monthPending = Carbon::now()->format('Y-m');
+
+        foreach (Student::pluck('id') as $sid) {
+            Payment::firstOrCreate(
+                ['student_id' => $sid, 'month' => $monthPaid],
+                [
+                    'amount'    => 1500.00,
+                    'due_date'  => Carbon::now()->subMonth()->day(5)->toDateString(),
+                    'status'    => 'paid',
+                    'paid_date' => Carbon::now()->subMonth()->day(3)->toDateString(),
+                ]
+            );
+
+            Payment::firstOrCreate(
+                ['student_id' => $sid, 'month' => $monthPending],
+                [
+                    'amount'    => 1500.00,
+                    'due_date'  => Carbon::now()->day(5)->toDateString(),
+                    'status'    => 'pending',
+                    'paid_date' => null,
+                ]
+            );
+        }
+
+        // ════════════════════════════════════════
+        // ANNONCES (AdminSeeder doit avoir tourné avant)
+        // ════════════════════════════════════════
+
+        $admin = Admin::first();
+        if ($admin) {
+            Announcement::firstOrCreate(
+                ['title' => 'مرحباً بكم في المدرسة القرآنية'],
+                [
+                    'created_by'   => $admin->id,
+                    'content'      => 'نرحب بجميع الطلاب وأولياء الأمور في بداية الفصل الدراسي الجديد.',
+                    'target_roles' => ['all'],
+                    'expiry_date'  => null,
+                ]
+            );
+
+            Announcement::firstOrCreate(
+                ['title' => 'تذكير بموعد دفع الاشتراك'],
+                [
+                    'created_by'   => $admin->id,
+                    'content'      => 'نذكر أولياء الأمور بضرورة دفع الاشتراك قبل تاريخ 10 من كل شهر.',
+                    'target_roles' => ['parent'],
+                    'expiry_date'  => Carbon::now()->addMonths(3)->toDateString(),
+                ]
+            );
+
+            Announcement::firstOrCreate(
+                ['title' => 'اجتماع المعلمين'],
+                [
+                    'created_by'   => $admin->id,
+                    'content'      => 'اجتماع دوري لمناقشة الحلقات والتقارير.',
+                    'target_roles' => ['teacher'],
+                    'expiry_date'  => Carbon::now()->addMonth()->toDateString(),
+                ]
+            );
+        }
+
+        $this->command->info('✅ TestDataSeeder: teachers, halaqat, parents, students, classrooms, séances, paiements, annonces');
         $this->command->info('   Teacher 1: teacher1@school.com / Teacher@1234');
         $this->command->info('   Teacher 2: teacher2@school.com / Teacher@1234');
         $this->command->info('   Parent  1: parent1@school.com  / Parent@1234');
         $this->command->info('   Parent  2: parent2@school.com  / Parent@1234');
         $this->command->info('   Parent  3: parent3@school.com  / Parent@1234');
-        $studentIds = Student::pluck('id');
-foreach ($studentIds as $sid) {
-    Payment::firstOrCreate(
-        ['student_id' => $sid, 'month' => '2025-03'],
-        [
-            'amount'   => 1500.00,
-            'due_date' => '2025-03-05',
-            'status'   => 'paid',
-            'paid_date'=> '2025-03-03',
-        ]
-    );
-    Payment::firstOrCreate(
-        ['student_id' => $sid, 'month' => '2025-04'],
-        [
-            'amount'   => 1500.00,
-            'due_date' => '2025-04-05',
-            'status'   => 'pending',
-            'paid_date'=> null,
-        ]
-    );
-}
-
-// ── ANNOUNCEMENTS ───────────────────────────
-$admin = Admin::first();
-if ($admin) {
-    Announcement::firstOrCreate(
-        ['title' => 'مرحباً بكم في المدرسة القرآنية'],
-        [
-            'created_by'   => $admin->id,
-            'content'      => 'نرحب بجميع الطلاب وأولياء الأمور في بداية الفصل الدراسي الجديد.',
-            'target_roles' => ['all'],
-            'expiry_date'  => null,
-        ]
-    );
-    Announcement::firstOrCreate(
-        ['title' => 'تذكير بموعد دفع الاشتراك'],
-        [
-            'created_by'   => $admin->id,
-            'content'      => 'نذكر أولياء الأمور بضرورة دفع اشتراك شهر أبريل قبل تاريخ 10/04/2025.',
-            'target_roles' => ['parent'],
-            'expiry_date'  => '2025-04-30',
-        ]
-    );
-}
-
-$this->command->info('✅ Payments + Announcements créés');
+        $this->command->info('   Admin:     admin@school.com   / Admin@1234');
     }
-
-    
 }

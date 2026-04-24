@@ -20,7 +20,7 @@ class AdminHalaqaController extends Controller
     public function index(): JsonResponse
     {
         $halaqat = $this->halaqaRepository->getAll();
-        return response()->json(
+        return $this->apiSuccess(
             HalaqaResource::collection($halaqat)
         );
     }
@@ -32,8 +32,9 @@ class AdminHalaqaController extends Controller
             $request->validated()
         );
 
-        return response()->json(
+        return $this->apiSuccess(
             new HalaqaResource($halaqa),
+            null,
             201
         );
     }
@@ -43,7 +44,7 @@ class AdminHalaqaController extends Controller
     {
         $halaqa = $this->halaqaRepository->findById($halaqa->id);
 
-        return response()->json(new HalaqaResource($halaqa));
+        return $this->apiSuccess(new HalaqaResource($halaqa));
     }
 
     // PUT /api/admin/halaqat/{halaqa}
@@ -56,7 +57,7 @@ class AdminHalaqaController extends Controller
             $request->validated()
         );
 
-        return response()->json(new HalaqaResource($updated));
+        return $this->apiSuccess(new HalaqaResource($updated));
     }
 
     // DELETE /api/admin/halaqat/{halaqa}
@@ -65,9 +66,10 @@ class AdminHalaqaController extends Controller
     {
         $this->halaqaRepository->deactivate($halaqa);
 
-        return response()->json([
-            'message' => 'تم تعطيل الحلقة بنجاح',
-        ]);
+        return $this->apiSuccess(
+            null,
+            'تم تعطيل الحلقة بنجاح'
+        );
     }
 
     // GET /api/admin/halaqat/{halaqa}/students
@@ -78,7 +80,7 @@ class AdminHalaqaController extends Controller
                          ->findByTeacher($halaqa->teacher_id ?? 0);
 
         // Utiliser StudentResource depuis le namespace global
-        return response()->json(
+        return $this->apiSuccess(
             \App\Http\Resources\StudentResource::collection(
                 $halaqa->students()->with('parent')->get()
             )

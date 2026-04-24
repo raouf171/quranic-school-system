@@ -39,7 +39,7 @@ class ParentController extends Controller
                            ->with('halaqa')
                            ->get();
 
-        return response()->json(StudentResource::collection($students));
+        return $this->apiSuccess(StudentResource::collection($students));
     }
 
     // GET /api/parent/children/{student}/attendance
@@ -53,7 +53,7 @@ class ParentController extends Controller
                                ->latest()
                                ->paginate(20);
 
-        return response()->json(AttendanceResource::collection($attendances));
+        return $this->apiSuccess(AttendanceResource::collection($attendances));
     }
 
     // GET /api/parent/children/{student}/memorizations
@@ -67,7 +67,7 @@ class ParentController extends Controller
                                  ->latest()
                                  ->paginate(20);
 
-        return response()->json(MemorizationResource::collection($memorizations));
+        return $this->apiSuccess(MemorizationResource::collection($memorizations));
     }
 
     // GET /api/parent/children/{student}/revisions
@@ -81,7 +81,7 @@ class ParentController extends Controller
                              ->latest()
                              ->paginate(20);
 
-        return response()->json(RevisionResource::collection($revisions));
+        return $this->apiSuccess(RevisionResource::collection($revisions));
     }
 
     // GET /api/parent/children/{student}/payments
@@ -94,7 +94,7 @@ class ParentController extends Controller
                            ->orderBy('month', 'desc')
                            ->get();
 
-        return response()->json($payments->map(fn($p) => [
+        return $this->apiSuccess($payments->map(fn($p) => [
             'id'         => $p->id,
             'month'      => $p->month,
             'amount'     => $p->amount,
@@ -116,19 +116,18 @@ class ParentController extends Controller
                           ->first();
 
         if (!$ranking) {
-            return response()->json([
-                'message' => 'لا يوجد تصنيف بعد',
+            return $this->apiSuccess([
                 'ranking' => null,
-            ]);
+            ], 'لا يوجد تصنيف بعد');
         }
 
-        return response()->json([
+        return $this->apiSuccess([
             'rank'         => $ranking->rank,
             'score'        => $ranking->score,
             'period_type'  => $ranking->period_type,
             'period_start' => $ranking->period_start?->format('Y-m-d'),
             'period_end'   => $ranking->period_end?->format('Y-m-d'),
-            'calculated_at'=> $ranking->calculated_at?->format('Y-m-d H:i'),
+            'calculated_at'=> $ranking->calculated_at?->toISOString(),
         ]);
     }
 
@@ -146,11 +145,11 @@ class ParentController extends Controller
                          ->latest()
                          ->get();
 
-        return response()->json($announcements->map(fn($a) => [
+        return $this->apiSuccess($announcements->map(fn($a) => [
             'id'         => $a->id,
             'title'      => $a->title,
             'content'    => $a->content,
-            'created_at' => $a->created_at->format('Y-m-d H:i'),
+            'created_at' => $a->created_at?->toISOString(),
             'expiry_date'=> $a->expiry_date?->format('Y-m-d'),
         ]));
     }

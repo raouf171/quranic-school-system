@@ -9,6 +9,8 @@ class ParentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $students = $this->relationLoaded('students') ? $this->students : null;
+
         return [
             'id'         => $this->id,
             'name'       => $this->name,
@@ -16,8 +18,8 @@ class ParentResource extends JsonResource
             'occupation' => $this->occupation,
             'address'    => $this->address,
 
-            'students' => $this->whenLoaded('students', fn() =>
-                $this->students->map(fn($s) => [
+            'students' => $students
+                ? $students->map(fn($s) => [
                     'id'                    => $s->id,
                     'full_name'             => $s->full_name,
                     'gender'                => $s->gender,
@@ -26,7 +28,7 @@ class ParentResource extends JsonResource
                     'school_level'          => $s->school_level,
                     'fee_status'            => $s->fee_status,
                 ])
-            ),
+                : null,
         ];
     }
 }

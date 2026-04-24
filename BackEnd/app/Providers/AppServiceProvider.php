@@ -4,7 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Schema; // ✅ ADD THIS
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Carbon;
 
 // Repositories
 use App\Repositories\Interfaces\StudentRepositoryInterface;
@@ -38,8 +39,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // ✅ FIX for MySQL key length issue
+        // Fix MySQL key length issue
         Schema::defaultStringLength(191);
+
+        // Format Carbon dates as ISO string
+        Carbon::serializeUsing(static fn (Carbon $carbon) => $carbon->toISOString());
 
         // Observers
         Attendance::observe(AttendanceObserver::class);

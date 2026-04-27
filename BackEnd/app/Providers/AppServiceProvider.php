@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
+
 use Illuminate\Support\Facades\Schema;
+
 use Illuminate\Support\Carbon;
 
 // Repositories
@@ -46,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
         Carbon::serializeUsing(static fn (Carbon $carbon) => $carbon->toISOString());
 
         // Observers
+        Carbon::serializeUsing(static fn (Carbon $carbon) => $carbon->toISOString());
+
+        // Enregistrer les Observers
+
         Attendance::observe(AttendanceObserver::class);
         Memorization::observe(MemorizationObserver::class);
         Payment::observe(PaymentObserver::class);

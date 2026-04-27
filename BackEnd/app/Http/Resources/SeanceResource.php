@@ -11,7 +11,7 @@ class SeanceResource extends JsonResource
     {
         return [
             'id'    => $this->id,
-            'date'  => $this->date?->format('Y-m-d'),
+'date' => $this->date_value,
             'notes' => $this->notes,
 
             'halaqa' => $this->whenLoaded('halaqa', fn() => [

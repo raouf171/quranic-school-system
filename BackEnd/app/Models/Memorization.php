@@ -6,9 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Memorization extends Model
 {
-    protected $table ='memorizations'; 
+    protected $table = 'memorizations'; 
+    
     protected $fillable = [
-        'seance_id' , 'student_id' , 'evaluation_id' , 'surah_start' , 'verse_start' , 'surah_end' , 'verse_end'
+        'seance_id', 
+        'student_id', 
+        'teacher_id',
+        'evaluation_id', 
+        'surah_start', 
+        'verse_start', 
+        'surah_end', 
+        'verse_end',
+        'evaluation_grade',
+        'points'  
     ];
 
     protected $casts = [
@@ -16,21 +26,27 @@ class Memorization extends Model
         'verse_start' => 'integer',
         'surah_end' => 'integer',
         'verse_end' => 'integer',
+        'points' => 'integer',
     ];
 
-
-    //relations 
-    public function seance(){
+    // relations 
+    public function seance()
+    {
         return $this->belongsTo(Seance::class, 'seance_id');
-}
+    }
 
-    public function student()  {
+    public function student()
+    {
         return $this->belongsTo(Student::class, 'student_id');
     }
 
-    public function teacher(){
+    public function teacher()
+    {
         return $this->belongsTo(Teacher::class, 'teacher_id');
     }
 
-
+    public function evaluation()
+    {
+        return $this->belongsTo(Evaluation::class, 'evaluation_id');
+    }
 }

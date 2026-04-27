@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Halaqa;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateHalaqaRequest extends FormRequest
@@ -13,10 +15,34 @@ class UpdateHalaqaRequest extends FormRequest
         return [
             'teacher_id'   => 'sometimes|nullable|integer|exists:teachers,id',
             'name'         => 'sometimes|string|max:100',
+            'gender'       => 'sometimes|in:male,female',
             'schedule'     => 'sometimes|nullable|string|max:255',
             'level'        => 'sometimes|nullable|string|max:50',
             'max_students' => 'sometimes|integer|min:1|max:100',
             'is_active'    => 'sometimes|boolean',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if (! $this->has('gender')) {
+                return;
+            }
+            $halaqa = $this->route('halaqa');
+            if (! $halaqa instanceof Halaqa) {
+                return;
+            }
+            $newGender = $this->input('gender');
+            if ($halaqa->gender === $newGender) {
+                return;
+            }
+            if ($halaqa->students()->where('gender', '!=', $newGender)->exists()) {
+                $validator->errors()->add(
+                    'gender',
+                    'لا يمكن تغيير جنس الحلقة: يوجد طلاب لا يطابقون الجنس الجديد'
+                );
+            }
+        });
     }
 }

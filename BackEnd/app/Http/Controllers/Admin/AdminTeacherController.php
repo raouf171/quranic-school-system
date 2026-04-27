@@ -17,7 +17,7 @@ class AdminTeacherController extends Controller
                            ->withCount('halaqat')
                            ->get();
 
-        return response()->json(
+        return $this->apiSuccess(
             TeacherResource::collection($teachers)
         );
     }
@@ -27,22 +27,22 @@ class AdminTeacherController extends Controller
     {
         $teacher->load(['account', 'halaqat.students']);
 
-        return response()->json(new TeacherResource($teacher));
+        return $this->apiSuccess(new TeacherResource($teacher));
     }
 
     // PUT /api/admin/teachers/{teacher}
     public function update(Request $request, Teacher $teacher): JsonResponse
-    {
-        $request->validate([
-            'name'         => 'sometimes|string|max:100',
-            'hiring_date'  => 'sometimes|nullable|date',
-            'is_available' => 'sometimes|boolean',
-        ]);
+{
+    $validated = $request->validate([
+        'name'         => 'sometimes|string|max:100',
+        'hiring_date'  => 'sometimes|nullable|date',
+        'is_available' => 'sometimes|boolean',
+    ]);
 
-        $teacher->update($request->validated());
+    $teacher->update($validated);
 
-        return response()->json(
-            new TeacherResource($teacher->fresh('halaqat'))
-        );
-    }
+    return $this->apiSuccess(
+        new TeacherResource($teacher->fresh('halaqat'))
+    );
+}
 }

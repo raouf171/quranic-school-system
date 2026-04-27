@@ -9,21 +9,24 @@ class AttendanceResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $student = $this->relationLoaded('student') ? $this->student : null;
+        $seance = $this->relationLoaded('seance') ? $this->seance : null;
+
         return [
             'id'                => $this->id,
             'status'            => $this->status,
             'evaluation_grade'  => $this->evaluation_grade,
-            'evaluation_points' => $this->evaluation_points,
+            'points' => $this->points,
 
-            'student' => $this->whenLoaded('student', fn() => [
-                'id'        => $this->student->id,
-                'full_name' => $this->student->full_name,
-            ]),
+            'student' => $student ? [
+                'id'        => $student->id,
+                'full_name' => $student->full_name,
+            ] : null,
 
-            'seance' => $this->whenLoaded('seance', fn() => [
-                'id'   => $this->seance->id,
-                'date' => $this->seance->date?->format('Y-m-d'),
-            ]),
+            'seance' => $seance ? [
+                'id'   => $seance->id,
+                'date' => $seance->dateEntry?->date_value?->format('Y-m-d'),
+            ] : null,
         ];
     }
 }

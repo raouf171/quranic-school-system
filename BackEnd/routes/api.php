@@ -40,6 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('students/form-enums', [AdminStudentController::class, 'formEnums']);
     Route::post('students/{student}/photo', [AdminStudentController::class, 'uploadPhoto']);
     Route::delete('students/{student}/photo', [AdminStudentController::class, 'deletePhoto']);
+    Route::get('parents', [AdminParentController::class, 'index']);
+    Route::get('parents/{parent}', [AdminParentController::class, 'show']);
     Route::put('parents/{parent}', [AdminParentController::class, 'update']);
     Route::get('students/{student}/payments', [AdminPaymentController::class, 'studentPayments']);
 
@@ -47,7 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('students', AdminStudentController::class);
 
     // Halaqat
-    Route::apiResource('halaqat', AdminHalaqaController::class);
+    Route::apiResource('halaqat', AdminHalaqaController::class) ->parameters(['halaqat' => 'halaqa']);
+
+
     Route::get('halaqat/{halaqa}/students',
         [AdminHalaqaController::class, 'students']);
 

@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Teacher\StoreSeanceRequest;
 use App\Http\Resources\SeanceResource;
 use App\Models\Halaqa;
 use App\Models\Seance;
 use App\Models\Teacher;
-use App\Models\DateEntry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -45,55 +43,8 @@ class TeacherSeanceController extends Controller
         );
     }
 
-    // POST /api/teacher/halaqat/{halaqa}/seances
-    // Ouvrir une nouvelle séance pour aujourd'hui
-    public function store(
-        StoreSeanceRequest $request,
-        Halaqa $halaqa
-    ): JsonResponse {
-        $teacher = $this->getTeacher($request);
-
-        // Vérifier ownership
-        if ($halaqa->teacher_id !== $teacher->id) {
-            return response()->json([
-                'message' => 'هذه الحلقة ليست من حلقاتك',
-            ], 403);
-        }
-
-        $dateEntry = DateEntry::firstOrCreate(
-            ['date_value' => $request->date],
-            ['created_by' => $teacher->id]
-        );
-
-        // firstOrCreate = si séance existe déjà pour ce jour → retourner existante
-        // Évite les doublons (unique constraint: halaqa_id + date)
-        $seance = Seance::firstOrCreate(
-            [
-                'halaqa_id' => $halaqa->id,
-                'date_id'   => $dateEntry->id,  
-            ],
-            [
-                'created_by'   => $teacher->id,
-                'classroom_id' => $request->classroom_id,
-                'notes'        => $request->notes,
-            ]
-        );
-
-        // Charger les relations pour la réponse
-        $seance->load(['halaqa', 'classroom', 'teacher']);
-
-        return $this->apiSuccess(
-            new SeanceResource($seance),
-            null,
-            201
-        );
-    }
-
-
-
-    
     // GET /api/teacher/seances/{seance}
-    // Détail d'une séance avec toutes ses données
+    // Détail d'une séance (où et quand)
     public function show(Request $request, Seance $seance): JsonResponse
     {
         $teacher = $this->getTeacher($request);
@@ -106,13 +57,7 @@ class TeacherSeanceController extends Controller
             ], 403);
         }
 
-        $seance->load([
-            'halaqa',
-            'classroom',
-            'attendances.student',
-            'memorizations.student',
-            'revisions.student',
-        ]);
+        $seance->load(['halaqa', 'classroom', 'dateEntry', 'teacher']);
 
         return $this->apiSuccess(new SeanceResource($seance));
     }

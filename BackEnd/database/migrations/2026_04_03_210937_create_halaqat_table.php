@@ -6,11 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
-     
-/*Run the migrations.*/
-  public function up(): void{Schema::create('halaqat', function (Blueprint $table) {$table->id();
-
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('halaqat', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('teacher_id')
                 ->nullable()
                 ->constrained('teachers')
@@ -35,8 +37,11 @@ return new class extends Migration
         });
     }
 
-    
-     
-/*Reverse the migrations.*/
-  public function down(): void{Schema::dropIfExists('halaqat');}
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('halaqat');
+    }
 };

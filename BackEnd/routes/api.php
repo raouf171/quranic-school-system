@@ -13,6 +13,7 @@ use App\Http\Controllers\Parent\ParentController;
 use App\Http\Controllers\Admin\AdminAccountController;
 use App\Http\Controllers\Admin\AdminParentController;
 use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\AdminSeanceController;
 
 use App\Http\Controllers\Admin\AdminAnnouncementController;
 use App\Http\Controllers\Admin\AdminClassroomController;
@@ -76,6 +77,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Classrooms
         Route::apiResource('classrooms', AdminClassroomController::class);
+
+        // Seances (managed by admin)
+        Route::get('seances', [AdminSeanceController::class, 'index']);
+        Route::post('seances', [AdminSeanceController::class, 'store']);
+        Route::get('seances/{seance}', [AdminSeanceController::class, 'show']);
+        Route::put('seances/{seance}', [AdminSeanceController::class, 'update']);
+        Route::delete('seances/{seance}', [AdminSeanceController::class, 'destroy']);
     });
 
     // ── TEACHER ───────────────────────────
@@ -92,7 +100,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Séances
         Route::get('halaqat/{halaqa}/seances', [TeacherSeanceController::class, 'index']);
-        Route::post('halaqat/{halaqa}/seances', [TeacherSeanceController::class, 'store']);
         Route::get('seances/{seance}', [TeacherSeanceController::class, 'show']);
 
         // Présence

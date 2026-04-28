@@ -7,6 +7,7 @@ use App\Http\Requests\Teacher\StoreAttendanceRequest;
 use App\Http\Resources\AttendanceResource;
 use App\Models\Attendance;
 use App\Models\Seance;
+use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,11 +21,26 @@ class TeacherAttendanceController extends Controller
                       ->firstOrFail();
     }
 
+    private function ensureTeacherOwnsSeance(Teacher $teacher, Seance $seance): ?JsonResponse
+    {
+        if ($seance->halaqa->teacher_id !== $teacher->id) {
+            return response()->json([
+                'message' => 'ليس لديك صلاحية الوصول إلى هذه الجلسة',
+            ], 403);
+        }
+
+        return null;
+    }
+
     // GET /api/teacher/seances/{seance}/attendance
     // Voir la liste de présence d'une séance
     public function index(Request $request, Seance $seance): JsonResponse
     {
         $teacher = $this->getTeacher($request);
+        $forbidden = $this->ensureTeacherOwnsSeance($teacher, $seance);
+        if ($forbidden) {
+            return $forbidden;
+        }
 
         $attendances = $seance->attendances()
                               ->with('student')
@@ -44,6 +60,26 @@ class TeacherAttendanceController extends Controller
         Seance $seance
     ): JsonResponse {
         $teacher = $this->getTeacher($request);
+        $forbidden = $this->ensureTeacherOwnsSeance($teacher, $seance);
+        if ($forbidden) {
+            return $forbidden;
+        }
+
+        $studentIds = collect($request->records)
+            ->pluck('student_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $validStudentIds = Student::whereIn('id', $studentIds)
+            ->where('halaqa_id', $seance->halaqa_id)
+            ->pluck('id');
+
+        if ($validStudentIds->count() !== $studentIds->count()) {
+            return response()->json([
+                'message' => 'بعض الطلاب لا ينتمون إلى حلقة هذه الجلسة',
+            ], 422);
+        }
 
         // Transaction = si une présence échoue → tout annuler
         // Évite les enregistrements partiels

@@ -7,6 +7,7 @@ use App\Http\Requests\Teacher\StoreRevisionRequest;
 use App\Http\Resources\RevisionResource;
 use App\Models\Revision;
 use App\Models\Seance;
+use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -52,6 +53,16 @@ class TeacherRevisionController extends Controller
             return response()->json([
                 'message' => 'Vous ne pouvez pas ajouter des révisions à une séance qui ne vous appartient pas'
             ], 403);
+        }
+
+        $studentBelongsToSeanceHalaqa = Student::where('id', $request->student_id)
+            ->where('halaqa_id', $seance->halaqa_id)
+            ->exists();
+
+        if (! $studentBelongsToSeanceHalaqa) {
+            return response()->json([
+                'message' => 'الطالب لا ينتمي إلى حلقة هذه الجلسة'
+            ], 422);
         }
         
         $revision = Revision::create([

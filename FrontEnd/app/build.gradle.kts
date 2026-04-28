@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.quranicschool.app"
+    namespace = "com.quranicschool.quranschoolapp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.quranicschool.app"
+        applicationId = "com.quranicschool.quranschoolapp"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -33,13 +33,27 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+    kotlinOptions {
+        jvmTarget = "21"
+    }
     buildFeatures {
         compose = true
     }
 }
 
+// Force a full JDK (Adoptium) for the project to ensure jlink is available
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
+}
+
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
 }
 
 dependencies {
@@ -70,6 +84,7 @@ dependencies {
 
     // ViewModel Compose
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.tv.material)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -7,6 +7,7 @@ use App\Http\Requests\Teacher\StoreMemorizationRequest;
 use App\Http\Resources\MemorizationResource;
 use App\Models\Memorization;
 use App\Models\Seance;
+use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,6 +54,16 @@ class TeacherMemorizationController extends Controller
             return response()->json([
                 'message' => 'ليس لديط الصلاحية لإضافة معلومات إلى هذه الجلسة'
             ], 403);
+        }
+
+        $studentBelongsToSeanceHalaqa = Student::where('id', $request->student_id)
+            ->where('halaqa_id', $seance->halaqa_id)
+            ->exists();
+
+        if (! $studentBelongsToSeanceHalaqa) {
+            return response()->json([
+                'message' => 'الطالب لا ينتمي إلى حلقة هذه الجلسة'
+            ], 422);
         }
         
         $memorization = Memorization::create([

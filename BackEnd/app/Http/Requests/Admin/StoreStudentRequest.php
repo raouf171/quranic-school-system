@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Halaqa;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreStudentRequest extends FormRequest
@@ -23,6 +25,9 @@ class StoreStudentRequest extends FormRequest
             'halaqa_id'       => 'nullable|integer|exists:halaqat,id',
 
             'full_name'       => 'required|string|max:100',
+            'gender'          => 'required|in:male,female',
+            'relationship_nature' => 'required|in:mother,father,uncle,aunt,grandfather,grandmother,legal_guardian,other',
+            'school_level'    => 'required|in:kindergarten,primary,middle_cem,high_school,university,other',
             'birth_date'      => 'nullable|date|before:today',
 
             // doit être une des valeurs ENUM définies
@@ -31,6 +36,25 @@ class StoreStudentRequest extends FormRequest
         ];
     }
 
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $halaqaId = $this->input('halaqa_id');
+            $gender = $this->input('gender');
+            if (! $halaqaId || ! $gender) {
+                return;
+            }
+            $halaqa = Halaqa::find($halaqaId);
+            if ($halaqa && $halaqa->gender !== $gender) {
+                $validator->errors()->add(
+                    'halaqa_id',
+                    'جنس الطالب يجب أن يطابق جنس الحلقة المختارة'
+                );
+            }
+        });
+    }
+
+    // Messages d'erreur personnalisés en arabe/français
     public function messages(): array
     {
         return [

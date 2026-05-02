@@ -13,16 +13,15 @@ return new class extends Migration
     {
         Schema::create('halaqat', function (Blueprint $table) {
             $table->id();
-
-            $table ->foreignId('teacher_id')
-                    
-            ->nullOnDelete()
-                   ->constrained('teachers') ;   
+            $table->foreignId('teacher_id')
+                ->nullable()
+                ->constrained('teachers')
+                ->nullOnDelete();
 
             $table ->string ('name' ,100) ; 
-            
+
             $table -> string ('schedule')->nullable() ;
-            
+
             $table ->unsignedInteger ('max_students') 
                   ->default(30) ; 
 

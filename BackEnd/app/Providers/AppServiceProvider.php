@@ -44,8 +44,7 @@ class AppServiceProvider extends ServiceProvider
         // Fix MySQL key length issue
         Schema::defaultStringLength(191);
 
-        // Format Carbon dates as ISO string
-        Carbon::serializeUsing(static fn (Carbon $carbon) => $carbon->toISOString());
+       
 
         // Observers
         Carbon::serializeUsing(static fn (Carbon $carbon) => $carbon->toISOString());

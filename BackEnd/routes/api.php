@@ -110,10 +110,16 @@ Route::middleware('auth:sanctum')->group(function () {
         // Mémorisation (hifz)
         Route::get('seances/{seance}/memorizations', [TeacherMemorizationController::class, 'index']);
         Route::post('seances/{seance}/memorizations', [TeacherMemorizationController::class, 'store']);
+        Route::put('seances/{seance}/memorizations/{memorization}', [TeacherMemorizationController::class, 'update']);
+        Route::patch('seances/{seance}/memorizations/{memorization}', [TeacherMemorizationController::class, 'update']);
+        Route::delete('seances/{seance}/memorizations/{memorization}', [TeacherMemorizationController::class, 'destroy']);
 
         // Révision (muraja'ah)
         Route::get('seances/{seance}/revisions', [TeacherRevisionController::class, 'index']);
         Route::post('seances/{seance}/revisions', [TeacherRevisionController::class, 'store']);
+        Route::put('seances/{seance}/revisions/{revision}', [TeacherRevisionController::class, 'update']);
+        Route::patch('seances/{seance}/revisions/{revision}', [TeacherRevisionController::class, 'update']);
+        Route::delete('seances/{seance}/revisions/{revision}', [TeacherRevisionController::class, 'destroy']);
 
         Route::get('announcements', [TeacherHalaqaController::class, 'announcements']);
     });

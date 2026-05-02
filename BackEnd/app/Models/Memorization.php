@@ -11,7 +11,7 @@ class Memorization extends Model
     protected $fillable = [
         'seance_id', 
         'student_id', 
-        'teacher_id',
+
         'evaluation_id', 
         'surah_start', 
         'verse_start', 

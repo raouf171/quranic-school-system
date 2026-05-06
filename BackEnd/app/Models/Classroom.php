@@ -19,5 +19,10 @@ class Classroom extends Model
 
     public function seances() {
         return $this->hasMany(Seance::class, 'classroom_id');
-    } 
+    }
+
+    public function halaqaSchedules()
+    {
+        return $this->hasMany(HalaqaSchedule::class, 'classroom_id');
+    }
 }

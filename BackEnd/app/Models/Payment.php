@@ -20,7 +20,7 @@ class Payment extends Model
         'amount' => 'decimal:2',
         'due_date' => 'date',
         'paid_date' => 'date',
-        'status' => 'enum',
+        'status' => 'string',
     ];
 
     //relations

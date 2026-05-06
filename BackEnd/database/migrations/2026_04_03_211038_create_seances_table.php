@@ -26,24 +26,35 @@ return new class extends Migration
                   ->nullable()
                   ->constrained('classrooms')
                   ->nullOnDelete();
-            
-             $table->text('notes')->nullable();
 
+            $table->foreignId('schedule_id')
+                  ->nullable()
+                  ->constrained('halaqa_schedules')
+                  ->nullOnDelete();
 
-             $table->foreignId('date_id')
-                                     ->nullable()
+            $table->date('occurrence_date');
 
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+
+            $table->enum('status', ['scheduled', 'held', 'cancelled'])
+                  ->default('scheduled');
+
+            $table->text('cancel_reason')->nullable();
+            $table->text('notes')->nullable();
+
+            $table->foreignId('date_id')
+                  ->nullable()
                   ->constrained('dates')
-                  ->nullOnDelete(); 
-            
+                  ->nullOnDelete();
 
             $table->timestamps();
 
-            $table->unique(['halaqa_id', 'date_id']); // here i ùake sure the seance is only for one halaqa in only on singe day 
-             
-            $table->index(['halaqa_id', 'date_id']);
-
-
+            // One materialized row per scheduled occurrence.
+            $table->unique(['halaqa_id', 'schedule_id', 'occurrence_date'], 'seance_occurrence_unique');
+            $table->index(['halaqa_id', 'occurrence_date']);
+            $table->index(['created_by', 'occurrence_date']);
+            $table->index(['status', 'occurrence_date']);
         });
     }
 
@@ -51,12 +62,7 @@ return new class extends Migration
      * Reverse the migrations.
      */
     public function down(): void
-{
-    // Drop the FK constraint FIRST before dropping the table
-    Schema::table('seances', function (Blueprint $table) {
-        $table->dropForeign(['halaqa_id']);
-    });
-
-    Schema::dropIfExists('seances');
-}
+    {
+        Schema::dropIfExists('seances');
+    }
 };

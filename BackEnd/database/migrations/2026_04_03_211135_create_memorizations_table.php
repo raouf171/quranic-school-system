@@ -27,10 +27,10 @@ return new class extends Migration
                   ->onDelete('cascade');
 
             
-                  $table->unsignedInteger('surah_start') ; 
-                  $table->unsignedInteger('verse_start') ; 
-                  $table->unsignedInteger('surah_end') ; 
-                  $table->unsignedInteger('verse_end') ;
+                  $table->unsignedInteger('surah_start')->default(0)  ; 
+                  $table->unsignedInteger('verse_start')->default(0) ; 
+                  $table->unsignedInteger('surah_end')->default(0) ; 
+                  $table->unsignedInteger('verse_end')->default(0)  ;
 
                   $table ->string('evaluation_grade',10)->nullable() ; 
             $table-> unsignedInteger ('points')->default(0) ; 

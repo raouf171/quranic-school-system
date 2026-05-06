@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
 
-            $table ->foreignId('parent_id')
-                   ->nullOndelete()
-                   ->constrained('parents')  ; 
+            $table->foreignId('parent_id')
+                  ->nullable()
+                  ->constrained('parents')
+                  ->nullOnDelete();
 
              $table->foreignId('halaqa_id')
                   ->nullable()

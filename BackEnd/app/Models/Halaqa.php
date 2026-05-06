@@ -11,9 +11,9 @@ class Halaqa extends Model
     protected $fillable = [
         'teacher_id',
         'name',
-        'schedule',
+        'gender',
         'max_students',      // ← FIXED: was 'maxx_students'
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
@@ -36,6 +36,47 @@ class Halaqa extends Model
     public function seances()            // ← FIXED: was 'seacnes'
     {
         return $this->hasMany(Seance::class, 'halaqa_id');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(HalaqaSchedule::class, 'halaqa_id');
+    }
+
+    public function nextSeance(): ?Seance
+    {
+        return $this->seances()
+            ->whereDate('occurrence_date', '>=', today())
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('occurrence_date')
+            ->orderBy('start_time')
+            ->with(['classroom', 'schedule'])
+            ->first();
+    }
+
+    public function getNextSeanceSummaryAttribute(): ?array
+    {
+        $nextSeance = $this->nextSeance();
+
+        if (! $nextSeance) {
+            return null;
+        }
+
+        return [
+            'id' => $nextSeance->id,
+            'date' => optional($nextSeance->occurrence_date)->format('Y-m-d'),
+            'schedule' => $nextSeance->schedule ? [
+                'id' => $nextSeance->schedule->id,
+                'weekday' => $nextSeance->schedule->weekday,
+                'start_time' => $nextSeance->schedule->start_time,
+                'end_time' => $nextSeance->schedule->end_time,
+            ] : null,
+            'classroom' => $nextSeance->classroom ? [
+                'id' => $nextSeance->classroom->id,
+                'name' => $nextSeance->classroom->name,
+                'building' => $nextSeance->classroom->building,
+            ] : null,
+        ];
     }
 
     // Check if Halaqa is full

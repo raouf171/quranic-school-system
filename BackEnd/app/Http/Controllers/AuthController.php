@@ -18,24 +18,24 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-//search for account in the account table
-        $account = Account::where('email', $request->email)->firstOrFail();
+//chercher
+        $account = Account::where('email', $request->email)->first()    ;
 
-        //Verifier si le compte existe 
+//Verifier si le compte existe 
         if (!$account || !Hash::check($request->password, $account->password)) {
             return response()->json([
                 'message' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
             ], 401); 
         }
 
-        // Étape 4 — Vérifier si le compte est actif
+//  compte est actif
         if (!$account->is_active) {
             return response()->json([
                 'message' => 'هذا الحساب غير نشط. تواصل مع المسؤول لكي تفعله ',
             ], 403);
         }
 
-        // Supprimer les anciens tokens , had la partie ra7 tkoun f log out , but in case where ...
+
         $account->tokens()->delete();
 
         $token = $account->createToken('auth_token')->plainTextToken;
@@ -43,11 +43,11 @@ class AuthController extends Controller
         $profile = $account->getProfile();
 
         // L'app mobile stocke token + role pour navigation
-        return response()->json([
+        return $this->apiSuccess([
             'token'   => $token,
             'role'    => $account->role,
             'profile' => $profile,
-        ], 200);
+        ]);
     }
 
  
@@ -58,11 +58,13 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
       
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'تم تسجيل الخروج بنجاح',
-        ], 200);
+        if ($token = $request->user()->currentAccessToken()) {
+            $token->delete();
+        }
+        return $this->apiSuccess(
+            null,
+            'تم تسجيل الخروج بنجاح'
+        );
     }
 
     // GET /api/me 
@@ -73,10 +75,10 @@ class AuthController extends Controller
 
         $profile = $account->getProfile();
 
-        return response()->json([
+        return $this->apiSuccess([
             'role'    => $account->role,
             'email'   => $account->email,
             'profile' => $profile,
-        ], 200);
+        ]);
     }
 }

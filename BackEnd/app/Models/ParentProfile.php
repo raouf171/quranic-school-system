@@ -12,6 +12,7 @@ class ParentProfile extends Model
     protected $fillable = [
         'account_id',
         'name',
+        'phone',
         'occupation',
         'address',
     ];

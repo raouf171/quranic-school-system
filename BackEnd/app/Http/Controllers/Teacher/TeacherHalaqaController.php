@@ -72,12 +72,20 @@ class TeacherHalaqaController extends Controller
         return $this->apiSuccess([
             'seance' => [
                 'id' => $nextSeance->id,
-                'date' => $nextSeance->dateEntry?->date_value?->format('Y-m-d'),
+                'date' => $nextSeance->occurrence_date?->format('Y-m-d'),
+                'start_time' => $nextSeance->start_time,
+                'end_time' => $nextSeance->end_time,
+                'status' => $nextSeance->status,
                 'halaqa' => [
                     'id' => $nextSeance->halaqa->id,
                     'name' => $nextSeance->halaqa->name,
-                    'schedule' => $nextSeance->halaqa->schedule,
                 ],
+                'schedule' => $nextSeance->schedule ? [
+                    'id' => $nextSeance->schedule->id,
+                    'weekday' => $nextSeance->schedule->weekday,
+                    'start_time' => $nextSeance->schedule->start_time,
+                    'end_time' => $nextSeance->schedule->end_time,
+                ] : null,
                 'classroom' => $nextSeance->classroom ? [
                     'id' => $nextSeance->classroom->id,
                     'name' => $nextSeance->classroom->name,

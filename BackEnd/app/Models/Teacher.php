@@ -49,15 +49,11 @@ protected $fillable = [
             'halaqa_id',
             $this->halaqat()->pluck('id')
         )
-        ->whereHas('dateEntry', function ($q) {
-            $q->whereDate('date_value', '>=', today());
-        })
-        ->with(['halaqa', 'classroom', 'dateEntry']) // use 'halaqa' if you rename relation
-        ->orderBy(
-            \App\Models\DateEntry::select('date_value')
-                ->whereColumn('dates.id', 'seances.date_id')
-                ->limit(1)
-        )
+        ->whereDate('occurrence_date', '>=', today())
+        ->where('status', '!=', 'cancelled')
+        ->with(['halaqa', 'classroom', 'schedule', 'dateEntry'])
+        ->orderBy('occurrence_date')
+        ->orderBy('start_time')
         ->first();
 }
 }

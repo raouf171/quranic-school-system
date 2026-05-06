@@ -11,13 +11,23 @@ class HalaqaResource extends JsonResource
     {
         $teacher = $this->relationLoaded('teacher') ? $this->teacher : null;
         $students = $this->relationLoaded('students') ? $this->students : null;
+        $schedules = $this->relationLoaded('schedules') ? $this->schedules : null;
 
         return [
             'id'           => $this->id,
             'name'         => $this->name,
             'gender'       => $this->gender,
             'level'        => $this->level,
-            'schedule'     => $this->schedule,
+            'schedules'    => $schedules
+                ? $schedules->map(fn ($slot) => [
+                    'id' => $slot->id,
+                    'weekday' => $slot->weekday,
+                    'start_time' => $slot->start_time,
+                    'end_time' => $slot->end_time,
+                    'classroom_id' => $slot->classroom_id,
+                    'is_active' => $slot->is_active,
+                ])
+                : null,
             'next_seance'  => $this->next_seance_summary,
             'max_students' => $this->max_students,
             'is_active'    => $this->is_active,

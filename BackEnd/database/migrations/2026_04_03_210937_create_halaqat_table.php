@@ -20,8 +20,6 @@ return new class extends Migration
 
             $table ->string ('name' ,100) ; 
 
-            $table -> string ('schedule')->nullable() ;
-
             $table ->unsignedInteger ('max_students') 
                   ->default(30) ; 
 

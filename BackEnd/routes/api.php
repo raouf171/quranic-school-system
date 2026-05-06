@@ -99,6 +99,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('next-seance', [TeacherHalaqaController::class, 'nextSeance']);
 
         // Séances
+        Route::get('seances/current-week', [TeacherSeanceController::class, 'currentWeek']);
+        Route::post('schedules/{schedule}/open', [TeacherSeanceController::class, 'openSchedule']);
+        Route::post('schedules/{schedule}/cancel', [TeacherSeanceController::class, 'cancelSchedule']);
+        Route::post('seances/extra', [TeacherSeanceController::class, 'storeExtra']);
         Route::get('halaqat/{halaqa}/seances', [TeacherSeanceController::class, 'index']);
         Route::get('seances/{seance}', [TeacherSeanceController::class, 'show']);
 

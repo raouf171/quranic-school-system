@@ -11,12 +11,20 @@ class Seance extends Model
     protected $fillable = [
         'halaqa_id', 
         'created_by',
+        'schedule_id',
+        'occurrence_date',
+        'start_time',
+        'end_time',
+        'status',
+        'cancel_reason',
         'classroom_id', 
         'date_id',
-        'notes'
+        'notes',
     ];
 
-    protected $casts = [];
+    protected $casts = [
+        'occurrence_date' => 'date',
+    ];
 
     // Relationship to DateEntry model
     public function dateEntry()  // ← Renamed for clarity
@@ -34,6 +42,11 @@ class Seance extends Model
     public function date()
     {
         return $this->belongsTo(DateEntry::class, 'date_id');
+    }
+
+    public function schedule()
+    {
+        return $this->belongsTo(HalaqaSchedule::class, 'schedule_id');
     }
 
     // Rest of your relations
@@ -67,5 +80,15 @@ class Seance extends Model
     public function attendances()
     {
         return $this->hasMany(Attendance::class, 'seance_id');
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === 'cancelled';
+    }
+
+    public function isExtra(): bool
+    {
+        return $this->schedule_id === null;
     }
 }

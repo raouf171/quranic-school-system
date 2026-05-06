@@ -28,7 +28,6 @@ class StudentResource extends JsonResource
                 'id'     => $halaqa->id,
                 'name'   => $halaqa->name,
                 'gender' => $halaqa->gender,
-                'schedule' => $halaqa->schedule,
                 'next_seance' => $halaqa->next_seance_summary,
             ] : null,
 

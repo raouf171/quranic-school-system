@@ -12,7 +12,6 @@ class Halaqa extends Model
         'teacher_id',
         'name',
         'gender',
-        'schedule',
         'max_students',      // ← FIXED: was 'maxx_students'
         'is_active',
     ];
@@ -39,14 +38,19 @@ class Halaqa extends Model
         return $this->hasMany(Seance::class, 'halaqa_id');
     }
 
+    public function schedules()
+    {
+        return $this->hasMany(HalaqaSchedule::class, 'halaqa_id');
+    }
+
     public function nextSeance(): ?Seance
     {
         return $this->seances()
-            ->join('dates', 'seances.date_id', '=', 'dates.id')
-            ->whereDate('dates.date_value', '>=', today())
-            ->orderBy('dates.date_value')
-            ->select('seances.*')
-            ->with(['dateEntry', 'classroom'])
+            ->whereDate('occurrence_date', '>=', today())
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('occurrence_date')
+            ->orderBy('start_time')
+            ->with(['classroom', 'schedule'])
             ->first();
     }
 
@@ -60,8 +64,13 @@ class Halaqa extends Model
 
         return [
             'id' => $nextSeance->id,
-            'date' => $nextSeance->dateEntry?->date_value?->format('Y-m-d'),
-            'schedule' => $this->schedule,
+            'date' => optional($nextSeance->occurrence_date)->format('Y-m-d'),
+            'schedule' => $nextSeance->schedule ? [
+                'id' => $nextSeance->schedule->id,
+                'weekday' => $nextSeance->schedule->weekday,
+                'start_time' => $nextSeance->schedule->start_time,
+                'end_time' => $nextSeance->schedule->end_time,
+            ] : null,
             'classroom' => $nextSeance->classroom ? [
                 'id' => $nextSeance->classroom->id,
                 'name' => $nextSeance->classroom->name,

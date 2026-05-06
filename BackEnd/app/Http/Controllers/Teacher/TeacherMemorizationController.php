@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Teacher\StoreMemorizationRequest;
 use App\Http\Requests\Teacher\UpdateMemorizationRequest;
 use App\Http\Resources\MemorizationResource;
+use App\Models\Attendance;
 use App\Models\Memorization;
 use App\Models\Seance;
 use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TeacherMemorizationController extends Controller
 {
@@ -61,16 +63,25 @@ class TeacherMemorizationController extends Controller
                 'message' => 'الطالب لا ينتمي إلى حلقة هذه الجلسة'
             ], 422);
         }
-        
-        $memorization = Memorization::create([
-            'seance_id'     => $seance->id,
-            'student_id'    => $request->student_id,
-            'evaluation_id' => $request->evaluation_id,
-            'surah_start'   => $request->surah_start,
-            'verse_start'   => $request->verse_start,
-            'surah_end'     => $request->surah_end,
-            'verse_end'     => $request->verse_end,
-        ]);
+
+        if ($response = $this->validateAttendanceBeforeMemorization($seance, (int) $request->student_id)) {
+            return $response;
+        }
+
+        $memorization = DB::transaction(function () use ($request, $seance) {
+            $this->ensurePresentAttendanceIfAllowed($seance, (int) $request->student_id);
+            $this->markSeanceHeldIfNeeded($seance);
+
+            return Memorization::create([
+                'seance_id'     => $seance->id,
+                'student_id'    => $request->student_id,
+                'evaluation_id' => $request->evaluation_id,
+                'surah_start'   => $request->surah_start,
+                'verse_start'   => $request->verse_start,
+                'surah_end'     => $request->surah_end,
+                'verse_end'     => $request->verse_end,
+            ]);
+        });
     
         $memorization->load(['student', 'evaluation']);
     
@@ -108,6 +119,10 @@ class TeacherMemorizationController extends Controller
             ], 422);
         }
 
+        if ($response = $this->validateAttendanceBeforeMemorization($seance, (int) $data['student_id'])) {
+            return $response;
+        }
+
         $payload = [
             'student_id' => $data['student_id'],
             'evaluation_id' => $data['evaluation_id'],
@@ -120,7 +135,11 @@ class TeacherMemorizationController extends Controller
             $payload['points'] = $data['points'];
         }
 
-        $memorization->update($payload);
+        DB::transaction(function () use ($memorization, $payload, $seance, $data) {
+            $this->ensurePresentAttendanceIfAllowed($seance, (int) $data['student_id']);
+            $this->markSeanceHeldIfNeeded($seance);
+            $memorization->update($payload);
+        });
 
         $memorization->load(['student', 'evaluation']);
 
@@ -161,5 +180,47 @@ class TeacherMemorizationController extends Controller
     private function recordBelongsToSeance(int $recordSeanceId, int $seanceId): bool
     {
         return $recordSeanceId === $seanceId;
+    }
+
+    private function validateAttendanceBeforeMemorization(Seance $seance, int $studentId): ?JsonResponse
+    {
+        $attendance = Attendance::where('seance_id', $seance->id)
+            ->where('student_id', $studentId)
+            ->first();
+
+        if ($attendance && $attendance->status === 'absent') {
+            return response()->json([
+                'message' => 'لا يمكن تسجيل حفظ لطالب غائب',
+            ], 422);
+        }
+
+        return null;
+    }
+
+    private function ensurePresentAttendanceIfAllowed(Seance $seance, int $studentId): void
+    {
+        $autoMark = (bool) config('seance.auto_mark_present_on_memorization', true);
+        if (! $autoMark) {
+            return;
+        }
+
+        Attendance::firstOrCreate(
+            [
+                'seance_id' => $seance->id,
+                'student_id' => $studentId,
+            ],
+            [
+                'status' => 'present',
+                'evaluation_grade' => null,
+                'points' => 0,
+            ]
+        );
+    }
+
+    private function markSeanceHeldIfNeeded(Seance $seance): void
+    {
+        if ($seance->status !== 'held') {
+            $seance->update(['status' => 'held']);
+        }
     }
 }

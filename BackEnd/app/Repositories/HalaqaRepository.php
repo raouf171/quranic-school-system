@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Halaqa;
 use App\Repositories\Interfaces\HalaqaRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class HalaqaRepository implements HalaqaRepositoryInterface
 {
@@ -37,7 +38,33 @@ class HalaqaRepository implements HalaqaRepositoryInterface
 
     public function create(array $data): Halaqa
     {
-        return Halaqa::create($data);
+        return DB::transaction(function () use ($data) {
+            $scheduleSlots = $data['schedules'] ?? [];
+            unset($data['schedules'], $data['schedule']);
+
+            $halaqa = Halaqa::create($data);
+
+            if (! empty($scheduleSlots)) {
+                $slotsToInsert = array_map(
+                    static function (array $slot, $index): array {
+                        return [
+                            'weekday' => (int) $slot['weekday'],
+                            'start_time' => $slot['start_time'],
+                            'end_time' => $slot['end_time'],
+                            'classroom_id' => $slot['classroom_id'] ?? null,
+                            'is_active' => $slot['is_active'] ?? true,
+                            'position' => $slot['position'] ?? $index,
+                        ];
+                    },
+                    $scheduleSlots,
+                    array_keys($scheduleSlots)
+                );
+
+                $halaqa->schedules()->createMany($slotsToInsert);
+            }
+
+            return $halaqa->fresh(['teacher', 'students', 'schedules']);
+        });
     }
 
     public function update(Halaqa $halaqa, array $data): Halaqa

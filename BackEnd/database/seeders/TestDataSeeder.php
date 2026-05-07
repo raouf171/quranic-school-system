@@ -95,12 +95,12 @@ class TestDataSeeder extends Seeder
         // 2 HALAQAT (noms inchangés)
         // ════════════════════════════════════════
 
+        // Times live on `halaqa_schedules`, not on `halaqat` (no `schedule` column).
         $halaqa1 = Halaqa::updateOrCreate(
             ['name' => 'حلقة الفجر'],
             [
                 'teacher_id'   => $teacher1->id,
                 'gender'       => 'female',
-                'schedule'     => 'Samedi & Dimanche 9h-11h',
                 'max_students' => 20,
                 'is_active'    => true,
             ]
@@ -111,7 +111,6 @@ class TestDataSeeder extends Seeder
             [
                 'teacher_id'   => $teacher2->id,
                 'gender'       => 'male',
-                'schedule'     => 'Vendredi 14h-16h',
                 'max_students' => 15,
                 'is_active'    => true,
             ]
@@ -304,51 +303,61 @@ class TestDataSeeder extends Seeder
             []
         );
 
-        Seance::firstOrCreate(
+        // `occurrence_date` is NOT NULL in schema; align with linked `dates.date_value`.
+        Seance::updateOrCreate(
             [
                 'halaqa_id' => $halaqa1->id,
                 'date_id'   => $dateTomorrow->id,
             ],
             [
-                'created_by'   => $teacher1->id,
-                'classroom_id' => $classroomA->id,
-                'notes'        => 'Séance test — حلقة الفجر',
+                'created_by'      => $teacher1->id,
+                'classroom_id'    => $classroomA->id,
+                'schedule_id'     => null,
+                'occurrence_date' => $dateTomorrow->date_value,
+                'notes'           => 'Séance test — حلقة الفجر',
             ]
         );
 
-        Seance::firstOrCreate(
+        Seance::updateOrCreate(
             [
                 'halaqa_id' => $halaqa1->id,
                 'date_id'   => $dateNextWeek->id,
             ],
             [
-                'created_by'   => $teacher1->id,
-                'classroom_id' => $classroomB->id,
-                'notes'        => 'Séance suivante — حلقة الفجر',
+                'created_by'      => $teacher1->id,
+                'classroom_id'    => $classroomB->id,
+                'schedule_id'     => null,
+                'occurrence_date' => $dateNextWeek->date_value,
+                'notes'           => 'Séance suivante — حلقة الفجر',
             ]
         );
 
-        Seance::firstOrCreate(
+        Seance::updateOrCreate(
             [
                 'halaqa_id' => $halaqa2->id,
                 'date_id'   => $dateInThree->id,
             ],
             [
-                'created_by'   => $teacher2->id,
-                'classroom_id' => $classroomC->id,
-                'notes'        => 'Séance test — حلقة النور',
+                'created_by'      => $teacher2->id,
+                'classroom_id'    => $classroomC->id,
+                'schedule_id'     => null,
+                'occurrence_date' => $dateInThree->date_value,
+                'notes'           => 'Séance test — حلقة النور',
             ]
         );
 
-        Seance::firstOrCreate(
+        Seance::updateOrCreate(
             [
                 'halaqa_id' => $halaqa1->id,
                 'date_id'   => $dateYesterday->id,
             ],
             [
-                'created_by'   => $teacher1->id,
-                'classroom_id' => $classroomA->id,
-                'notes'        => 'Séance passée (historique)',
+                'created_by'      => $teacher1->id,
+                'classroom_id'    => $classroomA->id,
+                'schedule_id'     => null,
+                'occurrence_date' => $dateYesterday->date_value,
+                'status'          => 'held',
+                'notes'           => 'Séance passée (historique)',
             ]
         );
 

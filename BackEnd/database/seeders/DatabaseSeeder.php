@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             EvaluationSeeder::class,
             AdminSeeder::class,
-            TestDataSeeder::class,
+            MassiveDataSeeder::class,
         ]);
     }
 }

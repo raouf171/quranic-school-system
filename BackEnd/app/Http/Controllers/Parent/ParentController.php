@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AttendanceResource;
 use App\Http\Resources\MemorizationResource;
 use App\Http\Resources\RevisionResource;
+use App\Http\Resources\AnnouncementResource;
 use App\Http\Resources\StudentResource;
 use App\Models\Announcement;
 use App\Models\ParentProfile;
@@ -142,15 +143,13 @@ class ParentController extends Controller
                             $q->whereNull('expiry_date')
                               ->orWhere('expiry_date', '>=', today());
                          })
+                         ->with('admin')
                          ->latest()
                          ->get();
 
-        return $this->apiSuccess($announcements->map(fn($a) => [
-            'id'         => $a->id,
-            'title'      => $a->title,
-            'content'    => $a->content,
-            'created_at' => $a->created_at?->toISOString(),
-            'expiry_date'=> $a->expiry_date?->format('Y-m-d'),
-        ]));
+        // Same shape as admin/teacher announcements so mobile clients parse AnnouncementDto.
+        return $this->apiSuccess(
+            AnnouncementResource::collection($announcements)
+        );
     }
 }
